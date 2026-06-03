@@ -705,6 +705,32 @@
   font-size: 14px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.resume-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  border: 1px solid rgba(255, 90, 214, 0.45);
+  background: rgba(255, 90, 214, 0.1);
+  color: var(--text-h);
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.resume-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 90, 214, 0.65);
+  background: rgba(255, 90, 214, 0.18);
 }
 
 .mono {
@@ -1524,12 +1550,323 @@
   .profileCard {
     padding: 14px 12px;
   }
+
   .footer {
-    padding: 24px 22px;
-    border-top: 1px solid var(--border);
+    padding: 14px 12px;
     display: flex;
     justify-content: center;
+    text-align: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+/* ====== Global Mobile Optimization ====== */
+@media (max-width: 900px) {
+  .topbar {
+    padding: 14px 12px;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .brand {
+    gap: 9px;
+    max-width: 64%;
+  }
+
+  .brandSub {
+    font-size: 12px;
+  }
+
+  .main {
+    padding: 14px 10px 20px;
+  }
+
+  .heroPanel,
+  .heroCopy {
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .panelHeader {
+    padding: 4px 4px 10px;
+  }
+
+  .panelHeader h2 {
+    font-size: 19px;
+  }
+
+  .composer {
+    padding: 12px 2px 10px;
+    gap: 8px;
+  }
+
+  .list {
+    padding: 0 2px 8px;
+  }
+
+  .task {
+    grid-template-columns: 34px 1fr 32px;
+    gap: 8px;
+    padding: 10px 9px;
+    border-radius: 13px;
+  }
+
+  .check,
+  .delete {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+  }
+
+  .taskMain {
+    font-size: 14px;
+  }
+
+  .footer {
+    padding: 14px 12px;
+    font-size: 12px;
+  }
+
+  .resume-btn {
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .brand {
+    max-width: 100%;
+  }
+
+  .topActions {
+    width: 100%;
+    justify-content: space-between;
     align-items: center;
-    gap: 400px; /* הרווח בין הטקסט לכפתור */
+  }
+
+  .userAvatarBtn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .userAvatarText {
+    font-size: 15px;
+  }
+
+  .segmented {
+    gap: 6px;
+  }
+
+  .seg {
+    min-height: 34px;
+    font-size: 12px;
+    border-radius: 10px;
+    padding: 6px 8px;
+  }
+
+  .segCount {
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+
+  .taskDue {
+    font-size: 11px;
+  }
+
+  .notesPage,
+  .profilePage {
+    width: 100%;
+  }
+
+  .notesSidebarTop h2 {
+    font-size: 22px;
+  }
+
+  .notesEditorPane {
+    padding: 12px;
+  }
+
+  .notesInputApple {
+    min-height: 42svh;
+    padding: 12px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .profileHeader h1 {
+    font-size: 28px;
+  }
+
+  .profileHeader p {
+    font-size: 14px;
+  }
+
+  .profileCard h3 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .brandName {
+    font-size: 15px;
+  }
+
+  .brandSub {
+    display: none;
+  }
+
+  .heroCopy h1 {
+    font-size: 29px;
+    line-height: 1.08;
+    margin: 2px 0 8px;
+  }
+
+  .heroCopy p {
+    font-size: 14px;
+  }
+
+  .panelHeader h2 {
+    font-size: 17px;
+  }
+
+  .authCard {
+    max-width: 100%;
+  }
+
+  .authForm {
+    padding: 10px 2px 6px;
+    gap: 10px;
+  }
+
+  .authInput,
+  .taskInput,
+  .timeInput {
+    border-radius: 11px;
+    padding: 10px 11px;
+    font-size: 14px;
+  }
+
+  .primaryBtn,
+  .ghostBtn {
+    border-radius: 11px;
+    min-height: 40px;
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+  .taskText {
+    gap: 4px;
+  }
+
+  .taskMain {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .empty {
+    padding: 18px 8px;
+    border-radius: 14px;
+  }
+
+  .notesSidebar {
+    border-radius: 14px;
+    padding: 10px;
+  }
+
+  .noteCard {
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 62px;
+  }
+
+  .notesEditorPane {
+    border-radius: 14px;
+  }
+
+  .deleteNoteBtn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .profileHeader {
+    border-radius: 14px;
+    padding: 14px 11px;
+  }
+
+  .profileCard {
+    border-radius: 14px;
+    padding: 12px 10px;
+  }
+
+  .profileRow {
+    padding: 8px 9px;
+    border-radius: 10px;
+  }
+
+  .profileRow span,
+  .profileRow strong {
+    font-size: 12px;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .resume-btn {
+    width: 100%;
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar {
+    padding: 12px 9px;
+  }
+
+  .main {
+    padding: 12px 8px 16px;
+  }
+
+  .seg {
+    font-size: 11px;
+    padding: 6px;
+  }
+
+  .composer {
+    gap: 6px;
+  }
+
+  .task {
+    grid-template-columns: 30px 1fr 28px;
+    gap: 6px;
+    padding: 8px 7px;
+  }
+
+  .check,
+  .delete {
+    width: 27px;
+    height: 27px;
+  }
+
+  .footer {
+    font-size: 11px;
+    padding: 10px 8px;
+  }
+
+  .resume-btn {
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 11px;
+    border-radius: 9px;
   }
 }

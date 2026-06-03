@@ -153,6 +153,22 @@ body {
   box-sizing: border-box;
 }
 
+@media (max-width: 760px) {
+  #root {
+    border-inline: none;
+  }
+}
+
+@media (max-width: 520px) {
+  :root {
+    font-size: 15px;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+}
+
 :root.gold-flash-now #root {
   border-inline-color: rgba(255, 215, 0, 1) !important;
   box-shadow:

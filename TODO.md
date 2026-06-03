@@ -11,6 +11,9 @@
 - [x] Run build and verify no regressions
 - [x] Remove remaining-tasks badge from top menu in `src/App.jsx`
 - [x] Run build and verify no regressions after topbar cleanup
-- [ ] Redesign `Personal profile` page UI in `src/App.css` (professional layout + cards + actions)
-- [ ] Ensure responsive behavior and dark mode polish for profile page
-- [ ] Run build and verify no regressions after profile redesign
+- [x] Redesign `Personal profile` page UI in `src/App.css` (professional layout + cards + actions)
+- [x] Ensure responsive behavior and dark mode polish for profile page
+- [x] Run build and verify no regressions after profile redesign
+- [x] Improve full mobile responsiveness across the app (`src/App.css`, `src/index.css`)
+- [x] Fix footer/mobile spacing issues and small-screen overflow
+- [x] Run build and verify no regressions after mobile optimization

@@ -819,8 +819,10 @@ function App() {
     target="_blank"
     rel="noopener noreferrer"
     className="resume-btn"
+    aria-label="View My Resume"
+    title="View My Resume"
   >
-    View My Resume
+    📄 View My Resume
   </a>
 </footer>
     </div>

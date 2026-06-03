@@ -820,7 +820,7 @@ function App() {
       </main>
 
       <footer className="footer">
-  <span>@tifaret 2026 -</span>
+  <span>@tifaret 2026 </span>
 
   <a
     href="https://drive.google.com/file/d/1nkHSB4BHNLffNERGIiypv-eaLLHDqyAW/view?usp=drive_link"

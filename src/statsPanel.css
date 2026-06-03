@@ -1,0 +1,169 @@
+/* ====== StatsPanel (progress chart) ====== */
+.statsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+@media (prefers-color-scheme: dark) {
+  .statsPanel {
+    background: rgba(0, 0, 0, 0.22);
+  }
+}
+
+.statsTop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+}
+
+.statsTitle {
+  font-weight: 900;
+  letter-spacing: -0.35px;
+  color: var(--text-h);
+}
+
+.statsSubtitle {
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.95;
+}
+
+.donutWrap {
+  position: relative;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+}
+
+.donutBg {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: radial-gradient(500px 240px at 10% 10%, rgba(255, 90, 214, 0.14), transparent 55%);
+  pointer-events: none;
+}
+
+.donutGlow {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 999px;
+  background: radial-gradient(circle at center, rgba(255, 90, 214, 0.22), transparent 62%);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.donut {
+  width: 170px;
+  height: 170px;
+  transform: rotate(-90deg);
+}
+
+.donutTrack {
+  fill: none;
+  stroke: rgba(255, 90, 214, 0.16);
+  stroke-width: 10;
+}
+
+.donutProgress {
+  fill: none;
+  stroke: url(#donutGrad);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.donutCenter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.donutPct {
+  font-size: 34px;
+  font-weight: 950;
+  letter-spacing: -1px;
+  color: var(--text-h);
+}
+
+.donutLbl {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  color: rgba(255, 90, 214, 0.95);
+}
+
+.donutLegend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.legItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.legDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 4px;
+}
+
+.legDotDone {
+  background: rgba(255, 90, 214, 0.95);
+  box-shadow: 0 0 0 4px rgba(255, 90, 214, 0.12);
+}
+
+.legDotActive {
+  background: rgba(160, 140, 255, 0.95);
+  box-shadow: 0 0 0 4px rgba(160, 140, 255, 0.12);
+}
+
+.legTxt {
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.95;
+}
+
+.barWrap {
+  padding-top: 4px;
+}
+
+.bar {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 90, 214, 0.10);
+  border: 1px solid rgba(255, 90, 214, 0.22);
+  overflow: hidden;
+  display: flex;
+}
+
+.barDone {
+  background: linear-gradient(90deg, rgba(255, 90, 214, 0.95), rgba(192, 132, 252, 0.95));
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  transition: width 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.barActive {
+  background: rgba(192, 132, 252, 0.22);
+}
+

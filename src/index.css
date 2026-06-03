@@ -1,0 +1,206 @@
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+/* App toggle (whatsapp-like): force light/dark via data-theme */
+:root[data-theme='dark'] {
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #16171d;
+  --border: #2e303a;
+  --code-bg: #1f2028;
+  --accent: #f472ff;
+  --accent-bg: rgba(244, 114, 255, 0.14);
+
+  --accent-border: rgba(192, 132, 252, 0.5);
+  --social-bg: rgba(47, 48, 58, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+}
+
+body {
+  margin: 0;
+}
+
+/* ====== Confetti ====== */
+.confetti-root {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, 0);
+}
+
+.confetti-root--fullscreen {
+  left: 50% !important;
+  top: 0 !important;
+}
+
+.confetti-piece {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 2px;
+  opacity: 0.98;
+  background: #ff5ad6;
+  transform: translate3d(var(--spawn-x, 0px), -40px, 0) rotate(var(--rotate, 0deg));
+  animation: confetti-fall var(--duration, 2200ms) cubic-bezier(0.12, 0.76, 0.22, 1) var(--delay, 0ms) both;
+  will-change: transform, opacity;
+}
+
+.confetti-piece--star {
+  clip-path: polygon(
+    50% 0%,
+    61% 36%,
+    98% 36%,
+    68% 57%,
+    79% 92%,
+    50% 71%,
+    21% 92%,
+    32% 57%,
+    2% 36%,
+    39% 36%
+  );
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.45),
+    0 0 14px rgba(255, 90, 214, 0.3);
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(var(--spawn-x, 0px), -60px, 0) rotate(var(--rotate, 0deg));
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  55% {
+    transform: translate3d(
+      calc(var(--spawn-x, 0px) + (var(--drift, 0px) * 0.5)),
+      52vh,
+      0
+    ) rotate(calc(var(--rotate, 0deg) + (var(--spin, 1turn) * 0.55)));
+  }
+  100% {
+    transform: translate3d(
+      calc(var(--spawn-x, 0px) + var(--drift, 0px)),
+      112vh,
+      0
+    ) rotate(calc(var(--rotate, 0deg) + var(--spin, 1turn)));
+    opacity: 0;
+  }
+}
+
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+:root.gold-flash-now #root {
+  border-inline-color: rgba(255, 215, 0, 1) !important;
+  box-shadow:
+    inset 1px 0 0 rgba(255, 215, 0, 1),
+    inset -1px 0 0 rgba(255, 215, 0, 1),
+    0 0 28px rgba(255, 215, 0, 0.48) !important;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}

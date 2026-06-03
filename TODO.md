@@ -1,0 +1,16 @@
+- [x] Add separate Profile view navigation in `src/App.jsx`
+- [x] Build Profile page UI (personal info, stats, preferences, security)
+- [x] Wire profile data from existing user/tasks/notes state
+- [x] Add Profile-specific styles in `src/App.css`
+- [x] Add topbar user initial icon that navigates to profile
+- [x] Add user icon styles in `src/App.css`
+- [x] Add separate Notes view navigation in `src/App.jsx`
+- [x] Move Notes UI out of Tasks panel into dedicated Notes page
+- [x] Create Apple Notes-like Notes page layout and interactions
+- [x] Redesign Notes page to a full professional UI in `src/App.css` (desktop + mobile + dark mode + RTL)
+- [x] Run build and verify no regressions
+- [x] Remove remaining-tasks badge from top menu in `src/App.jsx`
+- [x] Run build and verify no regressions after topbar cleanup
+- [ ] Redesign `Personal profile` page UI in `src/App.css` (professional layout + cards + actions)
+- [ ] Ensure responsive behavior and dark mode polish for profile page
+- [ ] Run build and verify no regressions after profile redesign

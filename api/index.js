@@ -84,5 +84,9 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+if (!isVercel) {
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => console.log(`Server running on port ${port}`));
+}
+
+export default app;

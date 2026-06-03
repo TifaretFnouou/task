@@ -1,5 +1,6 @@
-- [x] Diagnose and fix Vercel login 500 issue
-- [x] Update server DB path handling for serverless runtime
-- [x] Harden `/api/login` error handling and logging
-- [ ] Run critical API tests (register/login/forgot-password)
-- [ ] Summarize fix and deployment notes
+- [x] Audit and fix Vercel API runtime mismatch (`api/index.js` vs `server/index.js`)
+- [x] Convert `api/index.js` to Vercel serverless handler (remove `app.listen`, export app)
+- [ ] Verify `vercel.json` rewrites and function routing
+- [ ] Add robust runtime logging/config checks for Turso env vars
+- [ ] Run critical local endpoint tests against corrected API handler
+- [ ] Summarize root cause and exact deploy steps

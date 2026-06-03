@@ -715,24 +715,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 6px 12px;
-  border-radius: 10px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 12px;
   text-decoration: none;
-  font-weight: 800;
-  font-size: 13px;
+  font-weight: 900;
+  font-size: 14px;
   line-height: 1.1;
   white-space: nowrap;
-  border: 1px solid rgba(255, 90, 214, 0.45);
-  background: rgba(255, 90, 214, 0.1);
-  color: var(--text-h);
-  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  border: 1px solid rgba(255, 90, 214, 0.6);
+  background: linear-gradient(135deg, rgba(255, 90, 214, 0.95), rgba(214, 87, 255, 0.92));
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(255, 90, 214, 0.3);
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .resume-btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 90, 214, 0.65);
-  background: rgba(255, 90, 214, 0.18);
+  transform: translateY(-2px);
+  border-color: rgba(255, 90, 214, 0.85);
+  background: linear-gradient(135deg, rgba(255, 90, 214, 1), rgba(214, 87, 255, 1));
+  box-shadow: 0 14px 26px rgba(255, 90, 214, 0.4);
 }
 
 .mono {
@@ -1826,7 +1828,11 @@
 
   .resume-btn {
     width: 100%;
-    max-width: 240px;
+    max-width: 280px;
+    min-height: 46px;
+    padding: 10px 16px;
+    font-size: 15px;
+    border-radius: 14px;
   }
 }
 
@@ -1866,9 +1872,11 @@
   }
 
   .resume-btn {
-    min-height: 30px;
-    padding: 5px 9px;
-    font-size: 11px;
-    border-radius: 9px;
+    width: 100%;
+    max-width: 300px;
+    min-height: 48px;
+    padding: 11px 16px;
+    font-size: 15px;
+    border-radius: 14px;
   }
 }

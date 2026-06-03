@@ -11,8 +11,17 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-const dbPath = path.join(__dirname, 'app.db')
-const db = new sqlite3.Database(dbPath)
+const isVercel = process.env.VERCEL === '1'
+const sqlite3 = isVercel ? require('@libsql/sqlite3') : require('sqlite3');
+const dbPath = isVercel ? process.env.TURSO_DATABASE_URL : path.join(__dirname, 'app.db');
+
+const db = new sqlite3.Database(dbPath, isVercel ? { authToken: process.env.TURSO_AUTH_TOKEN } : null, (err) => {
+  if (err) {
+    console.error('Failed to open database:', err.message);
+  } else {
+    console.log(isVercel ? 'Connected to Turso Cloud Database' : 'SQLite connected locally');
+  }
+});
 
 db.serialize(() => {
   db.run(`
@@ -68,7 +77,10 @@ app.post('/api/login', (req, res) => {
   if (!password) return res.status(400).json({ error: 'Please enter password.' })
 
   db.get('SELECT id, email, name, password FROM users WHERE email = ?', [email], (err, row) => {
-    if (err) return res.status(500).json({ error: 'Failed to login.' })
+    if (err) {
+      console.error('Login query failed:', err.message, { email })
+      return res.status(500).json({ error: 'Failed to login.' })
+    }
     if (!row || row.password !== password) {
       return res.status(401).json({ error: 'Invalid email or password.' })
     }

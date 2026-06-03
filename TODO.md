@@ -1,19 +1,5 @@
-- [x] Add separate Profile view navigation in `src/App.jsx`
-- [x] Build Profile page UI (personal info, stats, preferences, security)
-- [x] Wire profile data from existing user/tasks/notes state
-- [x] Add Profile-specific styles in `src/App.css`
-- [x] Add topbar user initial icon that navigates to profile
-- [x] Add user icon styles in `src/App.css`
-- [x] Add separate Notes view navigation in `src/App.jsx`
-- [x] Move Notes UI out of Tasks panel into dedicated Notes page
-- [x] Create Apple Notes-like Notes page layout and interactions
-- [x] Redesign Notes page to a full professional UI in `src/App.css` (desktop + mobile + dark mode + RTL)
-- [x] Run build and verify no regressions
-- [x] Remove remaining-tasks badge from top menu in `src/App.jsx`
-- [x] Run build and verify no regressions after topbar cleanup
-- [x] Redesign `Personal profile` page UI in `src/App.css` (professional layout + cards + actions)
-- [x] Ensure responsive behavior and dark mode polish for profile page
-- [x] Run build and verify no regressions after profile redesign
-- [x] Improve full mobile responsiveness across the app (`src/App.css`, `src/index.css`)
-- [x] Fix footer/mobile spacing issues and small-screen overflow
-- [x] Run build and verify no regressions after mobile optimization
+- [x] Diagnose and fix Vercel login 500 issue
+- [x] Update server DB path handling for serverless runtime
+- [x] Harden `/api/login` error handling and logging
+- [ ] Run critical API tests (register/login/forgot-password)
+- [ ] Summarize fix and deployment notes

@@ -18,9 +18,9 @@ const db = new Database('database.db')
 app.use(express.static(path.join(__dirname, '../dist')))
 
 // לכל בקשה אחרת (שלא מתחילה ב-/api), נחזיר את index.html של ה-React
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'))
-})
+app.get('/*', (req, res) => { // הוספתי / לפני הכוכבית
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 // --------------------------
 
 const port = process.env.PORT || 3000;

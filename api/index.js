@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// הגדרת משתני נתיב לעבודה תקינה ב-Render
+// הגדרת משתני נתיב לעבודה תקינה בסביבת ענן
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -12,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// יצירת החיבור ל-Supabase (וודאי שהמשתנים מוגדרים ב-Environment Variables ב-Render)
+// חיבור ל-Supabase - וודאי שהמשתנים SUPABASE_URL ו-SUPABASE_KEY מוגדרים ב-Environment Variables ב-Render
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // --- חלק המשתמשים ---
@@ -65,8 +65,9 @@ app.put('/api/tasks/:id', async (req, res) => {
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
 
-// ניתוב לכל בקשה שלא מתחילה ב-/api ל-index.html
-app.get('/*', (req, res, next) => {
+// ניתוב לכל בקשה שלא מתחילה ב-/api ל-index.html 
+// השימוש ב-app.use במקום app.get מונע שגיאות ניתוב בספריות החדשות
+app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
   }

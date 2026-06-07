@@ -3,7 +3,7 @@ import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import fs from 'fs'; // הוסיפי בראש הקובץ
 // הגדרת משתני נתיב לעבודה תקינה בסביבת ענן
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,6 +11,15 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api')) {
+    const indexPath = path.join(distPath, 'index.html');
+    if (!fs.existsSync(indexPath)) {
+      console.error("ERROR: index.html not found at", indexPath);
+      return res.status(404).send("Build folder not found");
+    }
+  }
+  next();});
 
 // חיבור ל-Supabase - וודאי שהמשתנים SUPABASE_URL ו-SUPABASE_KEY מוגדרים ב-Environment Variables ב-Render
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
@@ -62,11 +71,11 @@ app.put('/api/tasks/:id', async (req, res) => {
 });
 
 // --- הגשת ה-Frontend ---
-const distPath = path.join(__dirname, '../dist');
+const distPath = path.resolve(__dirname, '..', 'dist');
 app.use(express.static(distPath));
 
 // ניתוב לכל בקשה שלא מתחילה ב-/api ל-index.html 
-// השימוש ב-app.use במקום app.get מונע שגיאות ניתוב בספריות החדשות
+// השימוש ב-app.use במקום שapp.get מונע שגיאות ניתוב בספריות החדשות
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();

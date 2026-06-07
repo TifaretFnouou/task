@@ -9,38 +9,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// חיבור ל-Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// פונקציית עזר להרשמה (דוגמה לאיך זה נראה עם Supabase)
+// 1. Register
 app.post('/api/register', async (req, res) => {
   const { email, name, password } = req.body;
-  
-  const { data, error } = await supabase
-    .from('users')
-    .insert([{ email, name, password }])
-    .select();
-
-  if (error) return res.status(409).json({ error: 'Email already registered or error occurred.' });
-  return res.json({ user: data[0] });
+  const { data, error } = await supabase.from('users').insert([{ email, name, password }]).select();
+  if (error) return res.status(409).json({ error: 'Email already registered.' });
+  res.json({ user: data[0] });
 });
 
-// פונקציית התחברות (דוגמה)
+// 2. Login
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-  
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .eq('password', password)
-    .single();
-
-  if (error || !data) return res.status(401).json({ error: 'Invalid credentials' });
-  return res.json({ user: data });
+  const { data, error } = await supabase.from('users').select('*').eq('email', email).eq('password', password).single();
+  if (error || !data) return res.status(401).json({ error: 'Invalid email or password.' });
+  res.json({ user: data });
 });
 
-// הגשת קבצים סטטיים (React)
+// 3. Forgot Password
+app.post('/api/forgot-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+  const { data, error } = await supabase.from('users').update({ password: newPassword }).eq('email', email).select();
+  if (error || !data || data.length === 0) return res.status(404).json({ error: 'Email not found.' });
+  res.json({ message: 'Password updated successfully.' });
+});
+
+// 4. Get Users
+app.get('/api/users', async (req, res) => {
+  const { data, error } = await supabase.from('users').select('id, email, name');
+  res.json({ users: data || [] });
+});
+
 app.use(express.static(path.join(__dirname, '../dist')));
 app.use((req, res, next) => {
   if (!req.path.startsWith('/api')) {

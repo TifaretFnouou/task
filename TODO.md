@@ -9,4 +9,3 @@
 - [x] Confirm UI runtime alignment instructions (dev + dev:api)
 - [x] Improve mobile-first UX polish in `src/App.css`
 - [ ] Run responsive verification at widths 380/430/520/760
-- [ ] Final report

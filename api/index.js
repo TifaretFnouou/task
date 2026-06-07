@@ -93,11 +93,10 @@ app.get('/api/users', (_req, res) => {
   return res.json({ users: users || [] })
 })
 
-if (!process.env.VERCEL) {
-  const port = 3000
-  app.listen(port, () => {
-    console.log(`API server listening on http://localhost:${port}`)
-  })
-}
+const port = process.env.PORT || 3000;
 
-export default app
+app.listen(port, () => {
+  console.log(`API server listening on port ${port}`);
+});
+
+export default app;

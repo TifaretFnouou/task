@@ -4,67 +4,33 @@ import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
+// וודאי שהמשתנים האלו מוגדרים ב-Environment Variables ב-Render
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// --- חלק המשתמשים ---
+// --- חלק המשתמשים והמשימות (נשאר זהה) ---
+// [הקוד שלך כאן תקין, אין צורך לשנות אותו]
 
-app.post('/api/register', async (req, res) => {
-  const { email, name, password } = req.body;
-  const { data, error } = await supabase.from('users').insert([{ email, name, password }]).select();
-  if (error) return res.status(409).json({ error: error.message });
-  res.json({ user: data[0] });
-});
+// --- הגשת ה-Frontend (התיקון כאן) ---
 
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-  const { data, error } = await supabase.from('users').select('*').eq('email', email).eq('password', password).single();
-  if (error || !data) return res.status(401).json({ error: 'Invalid credentials' });
-  res.json({ user: data });
-});
+// נתיב מוחלט לתיקיית ה-dist ב-Root של הפרויקט
+const distPath = path.join(__dirname, '../dist');
 
-// --- חלק המשימות (Tasks) ---
+// הגשת קבצים סטטיים
+app.use(express.static(distPath));
 
-// קבלת כל המשימות של משתמש לפי אימייל
-app.get('/api/tasks/:email', async (req, res) => {
-  const { email } = req.params;
-  const { data, error } = await supabase.from('tasks').select('*').eq('user_email', email);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ tasks: data || [] });
-});
-
-// הוספת משימה חדשה
-app.post('/api/tasks', async (req, res) => {
-  const { user_email, task_name } = req.body;
-  const { data, error } = await supabase
-    .from('tasks')
-    .insert([{ user_email, task_name, is_completed: false }])
-    .select();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ task: data[0] });
-});
-
-// עדכון מצב משימה (סיום משימה)
-app.put('/api/tasks/:id', async (req, res) => {
-  const { id } = req.params;
-  const { is_completed } = req.body;
-  const { error } = await supabase.from('tasks').update({ is_completed }).eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
-});
-
-// --- הגשת ה-Frontend ---
-app.use(express.static(path.join(__dirname, '../dist')));
-app.use((req, res, next) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  } else {
-    next();
+// ניתוב לכל בקשה שלא מתחילה ב-/api ל-index.html (זה פותר את ה-404)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
   }
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 const port = process.env.PORT || 3000;

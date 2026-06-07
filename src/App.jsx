@@ -71,3 +71,4 @@ useEffect(() => {
   }
   syncTasksFromDB();
 }, [user]);
+export default App;

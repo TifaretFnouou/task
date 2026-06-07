@@ -11,6 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// חיבור ל-Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // --- API Endpoints ---
@@ -51,17 +52,18 @@ app.put('/api/tasks/:id', async (req, res) => {
 });
 
 // --- Production Frontend Serving ---
-// אנו משתמשים ב-process.cwd() כדי לוודא שאנחנו מוצאים את תיקיית ה-dist בתיקיית הבסיס
 const distPath = path.join(process.cwd(), 'dist');
 
-// הגשת קבצים סטטיים מתיקיית ה-dist
+// הגשת קבצים סטטיים מהתיקייה שנוצרה ב-build
 app.use(express.static(distPath));
 
-// ניתוב לכל נתיב אחר ל-index.html (עבור React Router)
-app.get('*', (req, res) => {
+// ניתוב מותאם אישית (Middleware) במקום app.get('*')
+app.use((req, res, next) => {
+  // אם הבקשה מיועדת ל-API, דלג על הטיפול הזה
   if (req.path.startsWith('/api')) {
-    return; // אם זה API, אל תגיש את ה-index.html
+    return next();
   }
+  // לכל בקשה אחרת, הגש את ה-index.html של ה-React
   res.sendFile(path.join(distPath, 'index.html'));
 });
 

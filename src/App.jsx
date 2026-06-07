@@ -361,7 +361,15 @@ function App() {
               </div>
             </div>
 
-            <div className="authForm">
+            <form
+              className="authForm"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (authMode === 'login') login()
+                else if (authMode === 'register') register()
+                else forgotPassword()
+              }}
+            >
               <label className="field">
                 <span>{t.email}</span>
                 <input
@@ -420,9 +428,8 @@ function App() {
               {authSuccess ? <div className="authSuccess">{authSuccess}</div> : null}
 
               <button
-                type="button"
+                type="submit"
                 className="primaryBtn authSubmit"
-                onClick={authMode === 'login' ? login : authMode === 'register' ? register : forgotPassword}
               >
                 {authMode === 'login'
                   ? t.signInButton
@@ -446,7 +453,7 @@ function App() {
                   {lang === 'en' ? 'Forgot password?' : 'שכחתי סיסמה'}
                 </button>
               ) : null}
-            </div>
+            </form>
 
             <div className="panelFooter">
               <div className="hint">Demo auth using localStorage.</div>

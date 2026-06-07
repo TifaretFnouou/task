@@ -1647,11 +1647,17 @@
     width: 100%;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
+  }
+
+  .topActions .ghostBtn {
+    min-height: 44px;
+    padding: 10px 12px;
   }
 
   .userAvatarBtn {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
   }
 
   .userAvatarText {
@@ -1663,10 +1669,10 @@
   }
 
   .seg {
-    min-height: 34px;
+    min-height: 38px;
     font-size: 12px;
     border-radius: 10px;
-    padding: 6px 8px;
+    padding: 7px 9px;
   }
 
   .segCount {
@@ -1722,6 +1728,10 @@
     display: none;
   }
 
+  .main {
+    padding-bottom: 84px;
+  }
+
   .heroCopy h1 {
     font-size: 29px;
     line-height: 1.08;
@@ -1749,15 +1759,20 @@
   .taskInput,
   .timeInput {
     border-radius: 11px;
-    padding: 10px 11px;
+    padding: 11px 12px;
     font-size: 14px;
+    min-height: 44px;
+  }
+
+  .composer {
+    flex-direction: column;
   }
 
   .primaryBtn,
   .ghostBtn {
     border-radius: 11px;
-    min-height: 40px;
-    padding: 9px 11px;
+    min-height: 44px;
+    padding: 10px 12px;
     font-size: 13px;
   }
 
@@ -1793,6 +1808,7 @@
   .deleteNoteBtn {
     padding: 6px 10px;
     font-size: 12px;
+    min-height: 40px;
   }
 
   .profileHeader {
@@ -1821,7 +1837,7 @@
   }
 
   .resume-btn {
-    font-size: 13px;
+    font-size: 14px;
     white-space: normal;
   }
 }

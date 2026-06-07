@@ -1,6 +1,12 @@
-- [x] Audit and fix Vercel API runtime mismatch (`api/index.js` vs `server/index.js`)
-- [x] Convert `api/index.js` to Vercel serverless handler (remove `app.listen`, export app)
-- [ ] Verify `vercel.json` rewrites and function routing
-- [ ] Add robust runtime logging/config checks for Turso env vars
-- [ ] Run critical local endpoint tests against corrected API handler
-- [ ] Summarize root cause and exact deploy steps
+- [x] Compare current project against `../Aa-restore-server-version`
+- [x] Identify diffs in key files (`src/App.jsx`, `api/index.js`)
+- [x] Re-apply missing features from parallel project while keeping critical fixes:
+  - [x] Ensure resume button remains available
+  - [x] Keep auth form valid (password input inside form)
+  - [x] Keep API dev server listen (fix 502)
+  - [x] Keep robust auth endpoints (register/login/forgot-password)
+- [x] Run critical backend curl tests
+- [x] Confirm UI runtime alignment instructions (dev + dev:api)
+- [x] Improve mobile-first UX polish in `src/App.css`
+- [ ] Run responsive verification at widths 380/430/520/760
+- [ ] Final report

@@ -37,8 +37,10 @@ app.get('/api/tasks/:email', async (req, res) => {
 });
 
 app.post('/api/tasks', async (req, res) => {
-  const { user_email, task_name } = req.body;
-  const { data, error } = await supabase.from('tasks').insert([{ user_email, task_name, is_completed: false }]).select();
+  // תוספת: הוספתי את due_at לקבלת הנתונים מה-Body
+  const { user_email, task_name, due_at } = req.body;
+  // תוספת: הוספתי את due_at לאובייקט ה-insert
+  const { data, error } = await supabase.from('tasks').insert([{ user_email, task_name, is_completed: false, due_at }]).select();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ task: data[0] });
 });

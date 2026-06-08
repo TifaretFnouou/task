@@ -1,11 +1,3 @@
-- [x] Compare current project against `../Aa-restore-server-version`
-- [x] Identify diffs in key files (`src/App.jsx`, `api/index.js`)
-- [x] Re-apply missing features from parallel project while keeping critical fixes:
-  - [x] Ensure resume button remains available
-  - [x] Keep auth form valid (password input inside form)
-  - [x] Keep API dev server listen (fix 502)
-  - [x] Keep robust auth endpoints (register/login/forgot-password)
-- [x] Run critical backend curl tests
-- [x] Confirm UI runtime alignment instructions (dev + dev:api)
-- [x] Improve mobile-first UX polish in `src/App.css`
-- [ ] Run responsive verification at widths 380/430/520/760
+- [x] Update addTask in src/App.jsx to async with optimistic UI + server POST
+- [ ] Run critical-path check (add task flow)
+- [ ] Verify no basic build/lint issues

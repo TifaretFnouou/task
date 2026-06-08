@@ -129,20 +129,32 @@ function App() {
     return tasks.filter((t) => !t.done)
   }, [filter, tasks])
 
-  function addTask() {
+  async function addTask() {
     const text = draft.trim()
     const timeText = timeDraft.trim()
 
     if (!text) return
 
     const dueAt = timeText ? timeText : null
+    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt }
 
-    setTasks((prev) => [
-      { id: crypto.randomUUID(), text, done: false, dueAt },
-      ...prev,
-    ])
+    setTasks((prev) => [newTask, ...prev])
     setDraft('')
     setTimeDraft('')
+
+    try {
+      await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_email: getSessionEmail(),
+          task_name: text,
+          due_at: dueAt,
+        }),
+      })
+    } catch (err) {
+      console.error('שגיאה בשמירה לשרת:', err)
+    }
   }
 
   function toggleTask(id) {
@@ -628,7 +640,6 @@ function App() {
                   }}
                   aria-label={lang === 'en' ? 'Due time' : 'שעת יעד'}
                 />
-
                 <button
                   type="button"
                   className="primaryBtn"

@@ -130,30 +130,44 @@ function App() {
   }, [filter, tasks])
 
   async function addTask() {
-    const text = draft.trim()
-    const timeText = timeDraft.trim()
+    const text = draft.trim();
+    const email = getSessionEmail(); // כאן אנחנו מוודאים שיש אימייל
+    
+    if (!text) return;
 
-    if (!text) return
+    // בדיקה: האם המשתמש בכלל מחובר בטלפון?
+    if (!email) {
+      alert("שגיאה: לא מזוהה משתמש! האם את מחוברת?");
+      return;
+    }
 
-    const dueAt = timeText ? timeText : null
-    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt }
+    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt: timeDraft.trim() || null };
 
-    setTasks((prev) => [newTask, ...prev])
-    setDraft('')
-    setTimeDraft('')
+    // עדכון הממשק מיידית
+    setTasks((prev) => [newTask, ...prev]);
+    setDraft('');
+    setTimeDraft('');
 
+    // שליחה לשרת עם בדיקת שגיאות
     try {
-      await fetch('/api/tasks', {
+      const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_email: getSessionEmail(),
+          user_email: email,
           task_name: text,
-          due_at: dueAt,
+          due_at: newTask.dueAt
         }),
-      })
+      });
+
+      // אם יש שגיאה מהשרת, נדע מה היא
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert("השרת החזיר שגיאה: " + JSON.stringify(errorData));
+      }
     } catch (err) {
-      console.error('שגיאה בשמירה לשרת:', err)
+      // אם יש שגיאת רשת (למשל כתובת שרת לא נכונה)
+      alert("שגיאת רשת: " + err.message);
     }
   }
 

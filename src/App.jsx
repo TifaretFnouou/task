@@ -130,44 +130,30 @@ function App() {
   }, [filter, tasks])
 
   async function addTask() {
-    const text = draft.trim();
-    const email = getSessionEmail(); // כאן אנחנו מוודאים שיש אימייל
-    
-    if (!text) return;
+    const text = draft.trim()
+    const timeText = timeDraft.trim()
 
-    // בדיקה: האם המשתמש בכלל מחובר בטלפון?
-    if (!email) {
-      alert("שגיאה: לא מזוהה משתמש! האם את מחוברת?");
-      return;
-    }
+    if (!text) return
 
-    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt: timeDraft.trim() || null };
+    const dueAt = timeText ? timeText : null
+    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt }
 
-    // עדכון הממשק מיידית
-    setTasks((prev) => [newTask, ...prev]);
-    setDraft('');
-    setTimeDraft('');
+    setTasks((prev) => [newTask, ...prev])
+    setDraft('')
+    setTimeDraft('')
 
-    // שליחה לשרת עם בדיקת שגיאות
     try {
-      const response = await fetch('/api/tasks', {
+      await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_email: email,
+          user_email: getSessionEmail(),
           task_name: text,
-          due_at: newTask.dueAt
+          due_at: dueAt,
         }),
-      });
-
-      // אם יש שגיאה מהשרת, נדע מה היא
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert("השרת החזיר שגיאה: " + JSON.stringify(errorData));
-      }
+      })
     } catch (err) {
-      // אם יש שגיאת רשת (למשל כתובת שרת לא נכונה)
-      alert("שגיאת רשת: " + err.message);
+      console.error('שגיאה בשמירה לשרת:', err)
     }
   }
 
@@ -289,27 +275,17 @@ function App() {
     if (!password) return setAuthError('Please enter password.')
 
     try {
-      // 1. התחברות לשרת
       const data = await apiLogin({ email, password })
       setSessionEmail(email)
       setUser(data.user?.name || null)
-
-      // 2. משיכת משימות עדכניות מהשרת (במקום מה-localStorage)
-      const res = await fetch(`/api/tasks/${email}`);
-      const result = await res.json();
-      
-      // 3. עדכון ה-State עם מה שהגיע מהשרת
-      setTasks(result.tasks || []);
-      
-      // אם יש לך גם הערות בשרת, תעשי fetch דומה גם להן
-      // setNotes(...) 
-
+      setTasks(loadUserTasks(email))
+      setNotes(loadUserNotes(email))
       setView('tasks')
     } catch (err) {
-      setAuthError('שגיאה בהתחברות או במשיכת הנתונים מהשרת.')
-      console.error(err);
+      setAuthError(err.message || 'Invalid email or password.')
     }
   }
+
   async function forgotPassword() {
     setAuthError('')
     setAuthSuccess('')

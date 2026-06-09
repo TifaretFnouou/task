@@ -4,8 +4,7 @@ import { loadUserTasks, saveUserTasks, loadUserNotes, saveUserNotes } from './us
 import StatsPanel from './StatsPanel'
 
 import { getUserByEmail, setSessionEmail, getSessionEmail, clearSession } from './db'
-import { apiRegister, apiLogin, apiForgotPassword } from './api'
-
+import { apiRegister, apiLogin, apiForgotPassword, apiUpdateTask } from './api'
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase()
 }
@@ -158,34 +157,22 @@ function App() {
   }
 
   async function toggleTask(id) {
-    // 1. נמצא את המשימה הנוכחית כדי לדעת מה הסטטוס החדש שלה
     const taskToUpdate = tasks.find(t => t.id === id);
+    if (!taskToUpdate) return;
+    
     const newDoneStatus = !taskToUpdate.done;
 
-    // 2. עדכון מקומי (כדי שהממשק יגיב מהר)
-    setTasks((prev) => {
-      let shouldCelebrate = false
-      const nextTasks = prev.map((t) => {
-        if (t.id !== id) return t
-        if (!t.done && newDoneStatus) shouldCelebrate = true
-        return { ...t, done: newDoneStatus }
-      })
+    // עדכון מיידי בממשק (בשביל המהירות)
+    setTasks((prev) => prev.map((t) => t.id === id ? { ...t, done: newDoneStatus } : t));
 
-      if (shouldCelebrate) {
-        // ... (הקוד של החגיגה נשאר כאן)
-      }
-      return nextTasks
-    });
-
-    // 3. עדכון ב-Database (החלק שהיה חסר)
+    // עדכון בשרת (Supabase)
     try {
-      await fetch(`/api/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_completed: newDoneStatus }),
-      });
+      await apiUpdateTask(id, { is_completed: newDoneStatus });
     } catch (err) {
-      console.error('שגיאה בעדכון הסטטוס בשרת:', err);
+      console.error('שגיאה בעדכון בשרת:', err);
+      // אם נכשל - מחזירים את המצב הקודם למשתמש
+      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, done: !newDoneStatus } : t));
+      alert('שגיאת תקשורת: לא ניתן היה לעדכן את השרת.');
     }
   }
 

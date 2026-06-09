@@ -37,3 +37,9 @@ export function apiForgotPassword(payload) {
 export function apiGetUsers() {
   return request('/users')
 }
+export function apiUpdateTask(id, payload) {
+  return request(`/tasks/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}

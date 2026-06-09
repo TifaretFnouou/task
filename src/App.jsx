@@ -289,17 +289,27 @@ function App() {
     if (!password) return setAuthError('Please enter password.')
 
     try {
+      // 1. התחברות לשרת
       const data = await apiLogin({ email, password })
       setSessionEmail(email)
       setUser(data.user?.name || null)
-      setTasks(loadUserTasks(email))
-      setNotes(loadUserNotes(email))
+
+      // 2. משיכת משימות עדכניות מהשרת (במקום מה-localStorage)
+      const res = await fetch(`/api/tasks/${email}`);
+      const result = await res.json();
+      
+      // 3. עדכון ה-State עם מה שהגיע מהשרת
+      setTasks(result.tasks || []);
+      
+      // אם יש לך גם הערות בשרת, תעשי fetch דומה גם להן
+      // setNotes(...) 
+
       setView('tasks')
     } catch (err) {
-      setAuthError(err.message || 'Invalid email or password.')
+      setAuthError('שגיאה בהתחברות או במשיכת הנתונים מהשרת.')
+      console.error(err);
     }
   }
-
   async function forgotPassword() {
     setAuthError('')
     setAuthSuccess('')

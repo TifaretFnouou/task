@@ -134,8 +134,7 @@ function App() {
         if (data.tasks) {
           setTasks(
             data.tasks.map((task) => ({
-              id: task.id,
-              text: task.task_name,
+              id: task.id_text || task.id, // זה ייתן עדיפות ל-UUID אם קיים              text: task.task_name,
               done: Boolean(task.is_completed),
               dueAt: task.due_at || null,
             })),

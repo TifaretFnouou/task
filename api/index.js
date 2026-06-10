@@ -49,20 +49,16 @@ app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { is_completed } = req.body;
   
-  console.log(`מנסה לעדכן id_text: ${id} ל-is_completed: ${is_completed}`);
+  // נמיר את הערך לבוליאני בטוח
+  const status = is_completed === true || is_completed === 'true';
   
   const { data, error } = await supabase
     .from('tasks')
-    .update({ is_completed: is_completed })
+    .update({ is_completed: status })
     .eq('id_text', id)
-    .select(); // הוספנו select כדי לראות מה השתנה
-  
-  if (error) {
-    console.error('שגיאת מסד:', error);
-    return res.status(500).json({ error: error.message });
-  }
-  
-  console.log('שורות שעודכנו:', data);
+    .select();
+    
+  if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true, updated: data });
 });
 

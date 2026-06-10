@@ -94,7 +94,7 @@ function App() {
   }, [theme])
 
   const [user, setUser] = useState(() => getUserByEmail(getSessionEmail())?.name || null)
-  const [tasks, setTasks] = useState(() => loadUserTasks(getSessionEmail()))
+  const [tasks, setTasks] = useState([])  
   const [notes, setNotes] = useState(() => loadUserNotes(getSessionEmail()))
   const [selectedNoteId, setSelectedNoteId] = useState(() => loadUserNotes(getSessionEmail())?.[0]?.id || null)
 
@@ -113,15 +113,15 @@ function App() {
   const [view, setView] = useState('tasks') // tasks | notes | profile
   const [taskToast, setTaskToast] = useState('')
 
-  useEffect(() => {
-    if (!user) return
-    saveUserTasks(getSessionEmail(), tasks)
-  }, [tasks, user])
+  //useEffect(() => {
+   // if (!user) return
+  //  saveUserTasks(getSessionEmail(), tasks)
+ // }, [tasks, user])
 
-  useEffect(() => {
-    if (!user) return
-    saveUserNotes(getSessionEmail(), notes)
-  }, [notes, user])
+ // useEffect(() => {
+  //  if (!user) return
+  //  saveUserNotes(getSessionEmail(), notes)
+ // }, [notes, user])
 
   useEffect(() => {
     async function fetchTasksFromDB() {
@@ -154,17 +154,18 @@ function App() {
   }, [filter, tasks])
 
   async function addTask() {
-    const text = draft.trim()
-    const timeText = timeDraft.trim()
+    const text = draft.trim();
+    const timeText = timeDraft.trim();
 
-    if (!text) return
+    if (!text) return;
 
-    const dueAt = timeText ? timeText : null
-    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt }
+    const dueAt = timeText ? timeText : null;
+    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt };
 
-    setTasks((prev) => [newTask, ...prev])
-    setDraft('')
-    setTimeDraft('')
+    // עדכון הממשק
+    setTasks((prev) => [...prev, newTask]);
+    setDraft('');
+    setTimeDraft('');
 
     try {
       await fetch('/api/tasks', {
@@ -175,32 +176,12 @@ function App() {
           task_name: text,
           due_at: dueAt,
         }),
-      })
+      });
+      // אופציונלי: אפשר לקרוא ל-fetchTasksFromDB() כאן כדי לרענן את ה-ID מהשרת
     } catch (err) {
-      console.error('שגיאה בשמירה לשרת:', err)
+      console.error('שגיאה בשמירה לשרת:', err);
     }
   }
-
-  async function toggleTask(id) {
-    const taskToUpdate = tasks.find(t => t.id === id);
-    if (!taskToUpdate) return;
-    
-    const newDoneStatus = !taskToUpdate.done;
-
-    // עדכון מיידי בממשק (בשביל המהירות)
-    setTasks((prev) => prev.map((t) => t.id === id ? { ...t, done: newDoneStatus } : t));
-
-    // עדכון בשרת (Supabase)
-    try {
-      await apiUpdateTask(id, { is_completed: newDoneStatus });
-    } catch (err) {
-      console.error('שגיאה בעדכון בשרת:', err);
-      // אם נכשל - מחזירים את המצב הקודם למשתמש
-      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, done: !newDoneStatus } : t));
-      alert('שגיאת תקשורת: לא ניתן היה לעדכן את השרת.');
-    }
-  }
-
   function deleteNote(id) {
     setNotes((prev) => {
       const next = prev.filter((n) => n.id !== id)

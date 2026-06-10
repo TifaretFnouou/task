@@ -49,15 +49,34 @@ app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { is_completed } = req.body;
 
-  // ננסה לעדכן לפי id_text (עבור משימות חדשות) 
-  // או לפי id (עבור משימות ישנות עם מספרים)
+  // 1. המרה בטוחה לבוליאני כדי למנוע טעויות מול Supabase
+  const status = is_completed === true || is_completed === 'true';
+
+  console.log(`--- DEBUG: מנסה לעדכן משימה ID: ${id} לסטטוס: ${status} ---`);
+
+  // 2. חיפוש כפול: גם לפי ה-id (מספרי) וגם לפי ה-id_text (UUID)
   const { data, error } = await supabase
     .from('tasks')
-    .update({ is_completed: is_completed })
-    .or(`id_text.eq.${id},id.eq.${id}`) // "או id_text שווה לזה, או id שווה לזה"
+    .update({ is_completed: status })
+    .or(`id_text.eq.${id},id.eq.${id}`)
     .select();
 
-  if (error) return res.status(500).json({ error: error.message });
+  // 3. טיפול בשגיאות והדפסה ללוגים
+  if (error) {
+    console.error('--- שגיאת Supabase מפורטת: ---');
+    console.error(JSON.stringify(error, null, 2));
+    return res.status(500).json({ error: error.message });
+  }
+
+  // 4. בדיקה אם בכלל נמצאה שורה לעדכון
+  if (!data || data.length === 0) {
+    console.log('--- אזהרה: לא נמצאה שורה לעדכון עם ה-ID הזה ---');
+    return res.status(404).json({ error: 'Task not found' });
+  }
+
+  console.log('--- תוצאת עדכון (מה חזר מה-DB): ---');
+  console.log(data);
+  
   res.json({ success: true, updated: data });
 });
 // --- Production Frontend Serving ---

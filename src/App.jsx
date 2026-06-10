@@ -212,16 +212,17 @@ function App() {
   }
   const deleteTask = async (id) => {
     try {
-      const response = await fetch(`https://task-4559.onrender.com/api/tasks/${id}`, {
+      const response = await fetch(`https://task-4559.onrender.com/api/tasks`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id }) // שליחת ה-ID בתוך ה-Body
       });
       
       if (response.ok) {
-        // עדכון ה-State כדי להסיר את המשימה מהמסך
         setTasks((prev) => prev.filter((t) => t.id !== id));
         console.log("המשימה נמחקה בהצלחה!");
       } else {
-        alert("שגיאה במחיקה מהשרת");
+        console.error("שגיאה במחיקה מהשרת");
       }
     } catch (error) {
       console.error("שגיאה במחיקה:", error);

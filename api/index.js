@@ -21,7 +21,21 @@ app.post('/api/register', async (req, res) => {
   if (error) return res.status(409).json({ error: error.message });
   res.json({ user: data[0] });
 });
+app.delete('/api/tasks', async (req, res) => {
+  const { id } = req.body; // מקבלים את ה-ID מהגוף ולא מהנתיב
+  console.log(`--- מנסה למחוק משימה עם ID: ${id} ---`);
 
+  const { error } = await supabase
+    .from('tasks')
+    .delete()
+    .or(`id.eq.${id},id_text.eq.${id}`);
+
+  if (error) {
+    console.error('שגיאת מחיקה:', error);
+    return res.status(500).json({ error: error.message });
+  }
+  res.json({ success: true });
+});
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   const { data, error } = await supabase.from('users').select('*').eq('email', email).eq('password', password).single();

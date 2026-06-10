@@ -202,10 +202,6 @@ function App() {
     }
   }
 
-  function updateNote(id, text) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)))
-  }
-
   function deleteNote(id) {
     setNotes((prev) => {
       const next = prev.filter((n) => n.id !== id)
@@ -215,7 +211,23 @@ function App() {
       return next
     })
   }
-
+  const deleteTask = async (id) => {
+    try {
+      const response = await fetch(`https://task-4559.onrender.com/api/tasks/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        // עדכון ה-State כדי להסיר את המשימה מהמסך
+        setTasks((prev) => prev.filter((t) => t.id !== id));
+        console.log("המשימה נמחקה בהצלחה!");
+      } else {
+        alert("שגיאה במחיקה מהשרת");
+      }
+    } catch (error) {
+      console.error("שגיאה במחיקה:", error);
+    }
+  };
   function createNoteAfter(noteId) {
     const newNote = { id: crypto.randomUUID(), text: '' }
     setNotes((prev) => {

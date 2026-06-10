@@ -48,20 +48,18 @@ app.post('/api/tasks', async (req, res) => {
 app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { is_completed } = req.body;
-  
-  // נמיר את הערך לבוליאני בטוח
-  const status = is_completed === true || is_completed === 'true';
-  
+
+  // ננסה לעדכן לפי id_text (עבור משימות חדשות) 
+  // או לפי id (עבור משימות ישנות עם מספרים)
   const { data, error } = await supabase
     .from('tasks')
-    .update({ is_completed: status })
-    .eq('id_text', id)
+    .update({ is_completed: is_completed })
+    .or(`id_text.eq.${id},id.eq.${id}`) // "או id_text שווה לזה, או id שווה לזה"
     .select();
-    
+
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true, updated: data });
 });
-
 // --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
 

@@ -48,6 +48,7 @@ app.post('/api/tasks', async (req, res) => {
 app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { is_completed } = req.body;
+  console.log(`קבלתי בקשה לעדכון משימה ${id} לסטטוס ${is_completed}`);
   const { error } = await supabase.from('tasks').update({ is_completed }).eq('id_text', id);  if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });

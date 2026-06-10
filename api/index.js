@@ -21,19 +21,16 @@ app.post('/api/register', async (req, res) => {
   if (error) return res.status(409).json({ error: error.message });
   res.json({ user: data[0] });
 });
+// בתוך ה-DELETE בשרת:
 app.delete('/api/tasks', async (req, res) => {
-  const { id } = req.body; // מקבלים את ה-ID מהגוף ולא מהנתיב
-  console.log(`--- מנסה למחוק משימה עם ID: ${id} ---`);
+  const { id } = req.body;
+  const isUuid = String(id).includes('-');
+  
+  const { error } = isUuid 
+    ? await supabase.from('tasks').delete().eq('id_text', id)
+    : await supabase.from('tasks').delete().eq('id', id);
 
-  const { error } = await supabase
-    .from('tasks')
-    .delete()
-    .or(`id.eq.${id},id_text.eq.${id}`);
-
-  if (error) {
-    console.error('שגיאת מחיקה:', error);
-    return res.status(500).json({ error: error.message });
-  }
+  if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
 app.post('/api/login', async (req, res) => {
@@ -62,35 +59,20 @@ app.post('/api/tasks', async (req, res) => {
 app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { is_completed } = req.body;
-
-  // 1. המרה בטוחה לבוליאני כדי למנוע טעויות מול Supabase
   const status = is_completed === true || is_completed === 'true';
 
-  console.log(`--- DEBUG: מנסה לעדכן משימה ID: ${id} לסטטוס: ${status} ---`);
+  // בדיקה אם מדובר ב-UUID (מכיל מקף)
+  const isUuid = id.includes('-');
+  
+  let query = supabase.from('tasks').update({ is_completed: status });
+  query = isUuid ? query.eq('id_text', id) : query.eq('id', id);
 
-  // 2. חיפוש כפול: גם לפי ה-id (מספרי) וגם לפי ה-id_text (UUID)
-  const { data, error } = await supabase
-    .from('tasks')
-    .update({ is_completed: status })
-    .or(`id_text.eq.${id},id.eq.${id}`)
-    .select();
+  const { data, error } = await query.select();
 
-  // 3. טיפול בשגיאות והדפסה ללוגים
   if (error) {
-    console.error('--- שגיאת Supabase מפורטת: ---');
-    console.error(JSON.stringify(error, null, 2));
+    console.error('שגיאת עדכון:', error);
     return res.status(500).json({ error: error.message });
   }
-
-  // 4. בדיקה אם בכלל נמצאה שורה לעדכון
-  if (!data || data.length === 0) {
-    console.log('--- אזהרה: לא נמצאה שורה לעדכון עם ה-ID הזה ---');
-    return res.status(404).json({ error: 'Task not found' });
-  }
-
-  console.log('--- תוצאת עדכון (מה חזר מה-DB): ---');
-  console.log(data);
-  
   res.json({ success: true, updated: data });
 });
 // --- Production Frontend Serving ---

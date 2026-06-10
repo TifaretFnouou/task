@@ -215,7 +215,7 @@ function App() {
       const response = await fetch(`https://task-4559.onrender.com/api/tasks`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id }) // שליחת ה-ID בתוך ה-Body
+        body: JSON.stringify({ id: id })
       });
       
       if (response.ok) {

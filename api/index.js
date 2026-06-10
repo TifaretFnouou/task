@@ -61,18 +61,22 @@ app.put('/api/tasks/:id', async (req, res) => {
   const { is_completed } = req.body;
   const status = is_completed === true || is_completed === 'true';
 
-  // בדיקה אם מדובר ב-UUID (מכיל מקף)
-  const isUuid = id.includes('-');
+  // --- התיקון כאן ---
+  // אם ה-ID מכיל מקף, סימן שהוא UUID (id_text), אחרת הוא מספר (id)
+  const isUuid = String(id).includes('-');
   
-  let query = supabase.from('tasks').update({ is_completed: status });
-  query = isUuid ? query.eq('id_text', id) : query.eq('id', id);
+  const query = isUuid 
+    ? supabase.from('tasks').update({ is_completed: status }).eq('id_text', id)
+    : supabase.from('tasks').update({ is_completed: status }).eq('id', id);
 
   const { data, error } = await query.select();
+  // ------------------
 
   if (error) {
     console.error('שגיאת עדכון:', error);
     return res.status(500).json({ error: error.message });
   }
+
   res.json({ success: true, updated: data });
 });
 // --- Production Frontend Serving ---

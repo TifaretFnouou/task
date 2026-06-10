@@ -1,3 +1,5 @@
 - [x] Update addTask in src/App.jsx to async with optimistic UI + server POST
-- [ ] Run critical-path check (add task flow)
+- [x] Add fetchTasksFromDB useEffect on user login
+- [x] Persist task completion to DB in toggleTask via PUT /api/tasks/:id
+- [ ] Run critical-path check (add task flow + complete task sync)
 - [ ] Verify no basic build/lint issues

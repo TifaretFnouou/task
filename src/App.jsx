@@ -123,6 +123,32 @@ function App() {
     saveUserNotes(getSessionEmail(), notes)
   }, [notes, user])
 
+  useEffect(() => {
+    async function fetchTasksFromDB() {
+      const email = getSessionEmail()
+      if (!email) return
+
+      try {
+        const res = await fetch(`/api/tasks/${email}`)
+        const data = await res.json()
+        if (data.tasks) {
+          setTasks(
+            data.tasks.map((task) => ({
+              id: task.id,
+              text: task.task_name,
+              done: Boolean(task.is_completed),
+              dueAt: task.due_at || null,
+            })),
+          )
+        }
+      } catch (err) {
+        console.error('שגיאה במשיכת משימות מהשרת:', err)
+      }
+    }
+
+    if (user) fetchTasksFromDB()
+  }, [user])
+
   const filtered = useMemo(() => {
     if (filter === 'done') return tasks.filter((t) => t.done)
     return tasks.filter((t) => !t.done)

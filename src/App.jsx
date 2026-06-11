@@ -233,6 +233,7 @@ function App() {
       
       if (response.ok) {
         setTasks((prev) => prev.filter((t) => t.id !== id));
+        setTaskToast(lang === 'he' ? 'המשימה נמחקה בהצלחה' : 'Task deleted successfully');
         console.log("המשימה נמחקה בהצלחה!");
       } else {
         console.error("שגיאה במחיקה מהשרת");

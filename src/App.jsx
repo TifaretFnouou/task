@@ -150,9 +150,9 @@ function App() {
   }, [user])
 
   const filtered = useMemo(() => {
-    if (filter === 'done') return tasks.filter((t) => t.done)
-    return tasks.filter((t) => !t.done)
-  }, [filter, tasks])
+    const list = tasks.filter((t) => (filter === 'done' ? t.done : !t.done));
+    return filter === 'done' ? [...list].reverse() : list;
+  }, [filter, tasks]);
   async function toggleTask(id) {
     const taskToUpdate = tasks.find((t) => t.id === id);
     if (!taskToUpdate) return;

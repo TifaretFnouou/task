@@ -165,6 +165,11 @@ function App() {
     const newDoneStatus = !taskToUpdate.done;
   
     // עדכון מיידי בממשק (Optimistic Update)
+    function addNote() {
+      const newNote = { id: crypto.randomUUID(), text: '' };
+      setNotes((prev) => [newNote, ...prev]);
+      setSelectedNoteId(newNote.id);
+    }
     setTasks((prev) => 
       prev.map((t) => (t.id === id ? { ...t, done: newDoneStatus } : t))
     );

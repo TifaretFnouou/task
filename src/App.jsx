@@ -196,7 +196,9 @@ function App() {
     setTasks((prev) => [...prev, newTask]);
     setDraft('');
     setTimeDraft('');
-
+    if (newDoneStatus) {
+      setTaskToast(lang === 'he' ? 'כל הכבוד! משימה הושלמה' : 'Great job! Task completed');
+    }
     try {
       await fetch('/api/tasks', {
         method: 'POST',

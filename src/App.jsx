@@ -153,7 +153,31 @@ function App() {
     if (filter === 'done') return tasks.filter((t) => t.done)
     return tasks.filter((t) => !t.done)
   }, [filter, tasks])
-
+  async function toggleTask(id) {
+    const taskToUpdate = tasks.find((t) => t.id === id);
+    if (!taskToUpdate) return;
+  
+    const newDoneStatus = !taskToUpdate.done;
+  
+    // עדכון מיידי בממשק (Optimistic Update)
+    setTasks((prev) => 
+      prev.map((t) => (t.id === id ? { ...t, done: newDoneStatus } : t))
+    );
+  
+    try {
+      await fetch(`https://task-4559.onrender.com/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_completed: newDoneStatus }),
+      });
+    } catch (err) {
+      console.error('שגיאה בעדכון השרת:', err);
+      // אם נכשל, נחזיר את המצב הקודם
+      setTasks((prev) => 
+        prev.map((t) => (t.id === id ? { ...t, done: !newDoneStatus } : t))
+      );
+    }
+  }
   async function addTask() {
     const text = draft.trim();
     const timeText = timeDraft.trim();

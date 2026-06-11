@@ -107,11 +107,22 @@ app.get('/api/notes/:email', async (req, res) => {
 // יצירת הערה חדשה ב-Supabase
 app.post('/api/notes', async (req, res) => {
   const { user_email, text, id } = req.body;
+  
+  // בדיקה לפני שליחה
+  if (!id || !user_email) {
+    return res.status(400).json({ error: "Missing required fields: id or user_email" });
+  }
+
+  console.log("DEBUG: מנסה לשלוח ל-Supabase:", { id, user_email, text });
+  
   const { data, error } = await supabase.from('notes').insert([{ id, user_email, text }]).select();
-  if (error) return res.status(500).json({ error: error.message });
+  
+  if (error) {
+    console.error("DEBUG: שגיאת Supabase חמורה:", error); // זה יופיע ב-Logs של Render
+    return res.status(500).json({ error: error.message });
+  }
   res.json({ note: data[0] });
 });
-
 // מחיקת הערה מ-Supabase
 app.delete('/api/notes/:id', async (req, res) => {
   const { id } = req.params; // שיניתי ל-params כדי שיהיה עקבי עם המשימות

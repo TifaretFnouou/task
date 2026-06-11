@@ -80,14 +80,23 @@ app.put('/api/tasks/:id', async (req, res) => {
       .select());
   }
 
-  if (error) {
-    console.error('DEBUG: שגיאת DB:', error);
-    return res.status(500).json({ error: error.message });
-  }
+  // ... אחרי הניסיון הראשון עם id_text ...
 
-  console.log('DEBUG: תוצאת עדכון סופית:', data);
-  res.json({ success: true, updated: data });
-});
+// אם לא מצאנו וגם לא קיבלנו שגיאה, ננסה לפי id מספרי רק אם ה-ID הוא מספר
+if (!error && (!data || data.length === 0)) {
+  const numericId = parseInt(id); // ננסה להפוך למספר
+  
+  if (!isNaN(numericId)) { // נבדוק אם זה באמת מספר תקין
+      console.log("DEBUG: מנסה לפי id מספרי:", numericId);
+      ({ data, error } = await supabase
+          .from('tasks')
+          .update({ is_completed: status })
+          .eq('id', numericId) // נשתמש במספר ולא ב-UUID
+          .select());
+  } else {
+      console.log("DEBUG: ה-ID אינו מספר, לא ניתן לעדכן לפי id מספרי.");
+  }
+}
 // --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
 

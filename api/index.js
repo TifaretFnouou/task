@@ -61,21 +61,31 @@ app.put('/api/tasks/:id', async (req, res) => {
   const { is_completed } = req.body;
   const status = is_completed === true || is_completed === 'true';
 
-  const isUuid = String(id).includes('-');
-  console.log(`DEBUG: ID נכנס: ${id}, האם זה UUID? ${isUuid}`);
-  
-  const query = isUuid 
-    ? supabase.from('tasks').update({ is_completed: status }).eq('id_text', id)
-    : supabase.from('tasks').update({ is_completed: status }).eq('id', id);
+  console.log(`DEBUG: מנסה לעדכן את ID: ${id} לסטטוס: ${status}`);
 
-  const { data, error } = await query.select();
+  // ננסה לעדכן קודם לפי id_text (כי זה מה שאנחנו משתמשים בו)
+  let { data, error } = await supabase
+    .from('tasks')
+    .update({ is_completed: status })
+    .eq('id_text', id)
+    .select();
+
+  // אם לא מצאנו, ננסה לפי id מספרי (למקרה שזה משימה ישנה)
+  if (!error && (!data || data.length === 0)) {
+    console.log("DEBUG: לא נמצא id_text, מנסה לפי id מספרי...");
+    ({ data, error } = await supabase
+      .from('tasks')
+      .update({ is_completed: status })
+      .eq('id', id)
+      .select());
+  }
 
   if (error) {
     console.error('DEBUG: שגיאת DB:', error);
     return res.status(500).json({ error: error.message });
   }
 
-  console.log('DEBUG: תוצאת עדכון (data):', data);
+  console.log('DEBUG: תוצאת עדכון סופית:', data);
   res.json({ success: true, updated: data });
 });
 // --- Production Frontend Serving ---

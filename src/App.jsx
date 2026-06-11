@@ -14,7 +14,7 @@ function App() {
     const saved = localStorage.getItem('taskease_lang')
     return saved === 'en' ? 'en' : 'he'
   })
-
+  const [isLoading, setIsLoading] = useState(true);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('taskease_theme')
     return saved === 'dark' ? 'dark' : 'light'
@@ -126,7 +126,10 @@ function App() {
   useEffect(() => {
     async function fetchTasksFromDB() {
       const email = getSessionEmail()
-      if (!email) return
+      if (!email){
+        setIsLoading(false); // גם אם אין אימייל, מפסיקים את הטעינה
+        return
+      } 
 
       try {
         const res = await fetch(`/api/tasks/${email}`)
@@ -147,6 +150,7 @@ function App() {
     }
 
     if (user) fetchTasksFromDB()
+      else setIsLoading(false); // אם המשתמש לא מחובר, אין מה לטעון
   }, [user])
 
   const filtered = useMemo(() => {
@@ -517,7 +521,14 @@ function App() {
       </div>
     )
   }
-
+  if (isLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p>טוען נתונים...</p>
+      </div>
+    );
+  }
   return (
     <div className="page">
       <header className="topbar">

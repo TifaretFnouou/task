@@ -165,11 +165,7 @@ function App() {
     const newDoneStatus = !taskToUpdate.done;
   
     // עדכון מיידי בממשק (Optimistic Update)
-    function addNote() {
-      const newNote = { id: crypto.randomUUID(), text: '' };
-      setNotes((prev) => [newNote, ...prev]);
-      setSelectedNoteId(newNote.id);
-    }
+    
     setTasks((prev) => 
       prev.map((t) => (t.id === id ? { ...t, done: newDoneStatus } : t))
     );
@@ -221,13 +217,26 @@ function App() {
   }
   function deleteNote(id) {
     setNotes((prev) => {
-      const next = prev.filter((n) => n.id !== id)
+      const next = prev.filter((n) => n.id !== id);
       if (selectedNoteId === id) {
-        setSelectedNoteId(next[0]?.id || null)
+        setSelectedNoteId(next[0]?.id || null);
       }
-      return next
-    })
+      return next;
+    });
+    
+    // הוספת הודעה
+    setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted successfully');
   }
+  function addNote() {
+    const newNote = { id: crypto.randomUUID(), text: '' };
+    setNotes((prev) => [newNote, ...prev]);
+    setSelectedNoteId(newNote.id);
+  }
+
+  function updateNote(id, text) {
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)));
+  }
+
   const deleteTask = async (id) => {
     try {
       const response = await fetch(`https://task-4559.onrender.com/api/tasks`, {

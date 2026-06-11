@@ -235,16 +235,7 @@ function App() {
       console.error("שגיאה במחיקת פתק:", err);
     }
   }
-  function addNote() {
-    const newNote = { id: crypto.randomUUID(), text: '' };
-    setNotes((prev) => [newNote, ...prev]);
-    setSelectedNoteId(newNote.id);
-  }
-
-  function updateNote(id, text) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)));
-  }
-
+  
   const deleteTask = async (id) => {
     try {
       const response = await fetch(`https://task-4559.onrender.com/api/tasks`, {
@@ -322,56 +313,73 @@ function App() {
   }
 
   async function login() {
-    setAuthError('')
-    setAuthSuccess('')
+    setAuthError('');
+    setAuthSuccess('');
 
-    const email = normalizeEmail(authEmail)
-    const password = String(authPassword || '')
+    const email = normalizeEmail(authEmail);
+    const password = String(authPassword || '');
 
-    if (!email) return setAuthError('Please enter email.')
-    if (!password) return setAuthError('Please enter password.')
+    if (!email) return setAuthError('Please enter email.');
+    if (!password) return setAuthError('Please enter password.');
 
-    try {async function login() {
-      setAuthError('')
-      setAuthSuccess('')
-  
-      const email = normalizeEmail(authEmail)
-      const password = String(authPassword || '')
-  
-      if (!email) return setAuthError('Please enter email.')
-      if (!password) return setAuthError('Please enter password.')
-  
-      try {
-        const data = await apiLogin({ email, password })
-        setSessionEmail(email)
-        setUser(data.user?.name || null)
-  
-        // 1. טעינת משימות מהשרת
-        const tasksRes = await fetch(`https://task-4559.onrender.com/api/tasks/${email}`);
-        const tasksData = await tasksRes.json();
-        setTasks(tasksData.tasks || []);
-  
-        // 2. טעינת הערות מהשרת
-        const notesRes = await fetch(`https://task-4559.onrender.com/api/notes/${email}`);
-        const notesData = await notesRes.json();
-        setNotes(notesData.notes || []);
-  
-        setView('tasks');
-      } catch (err) {
-        setAuthError(err.message || 'Invalid email or password.');
-      }
-    }
-      const data = await apiLogin({ email, password })
-      setSessionEmail(email)
-      setUser(data.user?.name || null)
-      setTasks(loadUserTasks(email))
-      setNotes(loadUserNotes(email))
-      setView('tasks')
+    try {
+      const data = await apiLogin({ email, password });
+      setSessionEmail(email);
+      setUser(data.user?.name || null);
+      
+      // טעינה מהשרת
+      const [tasksRes, notesRes] = await Promise.all([
+        fetch(`https://task-4559.onrender.com/api/tasks/${email}`),
+        fetch(`https://task-4559.onrender.com/api/notes/${email}`)
+      ]);
+      
+      const tasksData = await tasksRes.json();
+      const notesData = await notesRes.json();
+      
+      setTasks(tasksData.tasks || []);
+      setNotes(notesData.notes || []);
+      setView('tasks');
     } catch (err) {
-      setAuthError(err.message || 'Invalid email or password.')
+      setAuthError(err.message || 'Invalid email or password.');
     }
   }
+// --- פונקציות מנוהלות תקינות ---
 
+async function addNote() {
+  const newNote = { id: crypto.randomUUID(), text: '' };
+  setNotes((prev) => [newNote, ...prev]);
+  setSelectedNoteId(newNote.id);
+
+  try {
+    await fetch('https://task-4559.onrender.com/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        id: newNote.id, 
+        user_email: getSessionEmail(), 
+        text: '' 
+      }),
+    });
+    setTaskToast(lang === 'he' ? 'פתק חדש נוסף' : 'New note added');
+  } catch (err) {
+    console.error("שגיאה בשמירת פתק:", err);
+  }
+}
+
+async function updateNote(id, text) {
+  // עדכון מקומי מהיר (Optimistic update)
+  setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)));
+
+  try {
+    await fetch(`https://task-4559.onrender.com/api/notes/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+  } catch (err) {
+    console.error("שגיאה בעדכון פתק בשרת:", err);
+  }
+}
   async function forgotPassword() {
     setAuthError('')
     setAuthSuccess('')

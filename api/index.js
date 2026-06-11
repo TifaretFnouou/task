@@ -96,6 +96,37 @@ if (!error && (!data || data.length === 0)) {
 
   console.log('DEBUG: תוצאת עדכון סופית:', data);
   res.json({ success: true, updated: data });
+});// שליפת כל ההערות של משתמש מ-Supabase
+app.get('/api/notes/:email', async (req, res) => {
+  const { email } = req.params;
+  const { data, error } = await supabase.from('notes').select('*').eq('user_email', email);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ notes: data || [] });
+});
+
+// יצירת הערה חדשה ב-Supabase
+app.post('/api/notes', async (req, res) => {
+  const { user_email, text, id } = req.body;
+  const { data, error } = await supabase.from('notes').insert([{ id, user_email, text }]).select();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ note: data[0] });
+});
+
+// מחיקת הערה מ-Supabase
+app.delete('/api/notes/:id', async (req, res) => {
+  const { id } = req.params; // שיניתי ל-params כדי שיהיה עקבי עם המשימות
+  const { error } = await supabase.from('notes').delete().eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// בונוס: הוספת עדכון הערה (חשוב מאוד!)
+app.put('/api/notes/:id', async (req, res) => {
+  const { id } = req.params;
+  const { text } = req.body;
+  const { error } = await supabase.from('notes').update({ text }).eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
 });
 // --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');

@@ -215,17 +215,25 @@ function App() {
       console.error('שגיאה בשמירה לשרת:', err);
     }
   }
-  function deleteNote(id) {
-    setNotes((prev) => {
-      const next = prev.filter((n) => n.id !== id);
-      if (selectedNoteId === id) {
-        setSelectedNoteId(next[0]?.id || null);
-      }
-      return next;
-    });
-    
-    // הוספת הודעה
-    setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted successfully');
+  async function deleteNote(id) {
+    // 1. קריאה לשרת
+    try {
+      await fetch(`https://task-4559.onrender.com/api/notes`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      
+      // 2. עדכון ה-State המקומי רק אם המחיקה בשרת הצליחה
+      setNotes((prev) => {
+        const next = prev.filter((n) => n.id !== id);
+        if (selectedNoteId === id) setSelectedNoteId(next[0]?.id || null);
+        return next;
+      });
+      setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted');
+    } catch (err) {
+      console.error("שגיאה במחיקת פתק:", err);
+    }
   }
   function addNote() {
     const newNote = { id: crypto.randomUUID(), text: '' };
@@ -323,7 +331,36 @@ function App() {
     if (!email) return setAuthError('Please enter email.')
     if (!password) return setAuthError('Please enter password.')
 
-    try {
+    try {async function login() {
+      setAuthError('')
+      setAuthSuccess('')
+  
+      const email = normalizeEmail(authEmail)
+      const password = String(authPassword || '')
+  
+      if (!email) return setAuthError('Please enter email.')
+      if (!password) return setAuthError('Please enter password.')
+  
+      try {
+        const data = await apiLogin({ email, password })
+        setSessionEmail(email)
+        setUser(data.user?.name || null)
+  
+        // 1. טעינת משימות מהשרת
+        const tasksRes = await fetch(`https://task-4559.onrender.com/api/tasks/${email}`);
+        const tasksData = await tasksRes.json();
+        setTasks(tasksData.tasks || []);
+  
+        // 2. טעינת הערות מהשרת
+        const notesRes = await fetch(`https://task-4559.onrender.com/api/notes/${email}`);
+        const notesData = await notesRes.json();
+        setNotes(notesData.notes || []);
+  
+        setView('tasks');
+      } catch (err) {
+        setAuthError(err.message || 'Invalid email or password.');
+      }
+    }
       const data = await apiLogin({ email, password })
       setSessionEmail(email)
       setUser(data.user?.name || null)

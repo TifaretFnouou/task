@@ -71,15 +71,6 @@ app.put('/api/tasks/:id', async (req, res) => {
     .select();
 
   // אם לא מצאנו, ננסה לפי id מספרי (למקרה שזה משימה ישנה)
-  if (!error && (!data || data.length === 0)) {
-    console.log("DEBUG: לא נמצא id_text, מנסה לפי id מספרי...");
-    ({ data, error } = await supabase
-      .from('tasks')
-      .update({ is_completed: status })
-      .eq('id', id)
-      .select());
-  }
-
   // ... אחרי הניסיון הראשון עם id_text ...
 
 // אם לא מצאנו וגם לא קיבלנו שגיאה, ננסה לפי id מספרי רק אם ה-ID הוא מספר
@@ -97,6 +88,15 @@ if (!error && (!data || data.length === 0)) {
       console.log("DEBUG: ה-ID אינו מספר, לא ניתן לעדכן לפי id מספרי.");
   }
 }
+
+  if (error) {
+    console.error('DEBUG: שגיאת DB:', error);
+    return res.status(500).json({ error: error.message });
+  }
+
+  console.log('DEBUG: תוצאת עדכון סופית:', data);
+  res.json({ success: true, updated: data });
+});
 // --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
 

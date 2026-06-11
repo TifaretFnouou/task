@@ -150,16 +150,10 @@ function App() {
   }, [user])
 
   const filtered = useMemo(() => {
-    // קודם מסננים
-    let list = tasks.filter((t) => (filter === 'done' ? t.done : !t.done));
-    
-    // אם אנחנו בתצוגת "הושלמו", נהפוך את הסדר (האחרון שהתווסף יופיע ראשון)
-    if (filter === 'done') {
-      return [...list].reverse(); 
-    }
-    
-    return list;
-  }, [filter, tasks]);
+    if (filter === 'done') return tasks.filter((t) => t.done)
+    return tasks.filter((t) => !t.done)
+  }, [filter, tasks])
+  
   async function toggleTask(id) {
     const taskToUpdate = tasks.find((t) => t.id === id);
     if (!taskToUpdate) return;

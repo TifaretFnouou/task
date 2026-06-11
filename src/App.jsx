@@ -168,7 +168,9 @@ function App() {
     setTasks((prev) => 
       prev.map((t) => (t.id === id ? { ...t, done: newDoneStatus } : t))
     );
-  
+    if (newDoneStatus) {
+      setTaskToast(lang === 'he' ? 'כל הכבוד! משימה הושלמה' : 'Great job! Task completed');
+    }
     try {
       await fetch(`https://task-4559.onrender.com/api/tasks/${id}`, {
         method: 'PUT',
@@ -196,9 +198,7 @@ function App() {
     setTasks((prev) => [...prev, newTask]);
     setDraft('');
     setTimeDraft('');
-    if (newDoneStatus) {
-      setTaskToast(lang === 'he' ? 'כל הכבוד! משימה הושלמה' : 'Great job! Task completed');
-    }
+
     try {
       await fetch('/api/tasks', {
         method: 'POST',
@@ -524,12 +524,7 @@ function App() {
     )
   }
   if (isLoading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner"></div>
-        <p>טוען נתונים...</p>
-      </div>
-    );
+    return <div className="loading-screen">טוען נתונים...</div>;
   }
   return (
     <div className="page">

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-import { loadUserTasks, loadUserNotes } from './userTasksStore'
+import { loadUserNotes } from './userTasksStore'
 import StatsPanel from './StatsPanel'
 
 import { getUserByEmail, setSessionEmail, getSessionEmail, clearSession } from './db'
@@ -319,8 +319,8 @@ function App() {
     try {
       const data = await apiLogin({ email, password })
       setSessionEmail(email)
-      setUser(data.user?.name || null)
-      setTasks(loadUserTasks(email))
+      setUser(data.user?.name || data.user?.user_email || email)
+      setTasks([])
       setNotes(loadUserNotes(email))
       setView('tasks')
     } catch (err) {

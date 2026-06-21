@@ -221,8 +221,6 @@ function App() {
       console.error('שגיאה בשמירה לשרת:', err)
     }
   }
-<<<<<<< HEAD
-
   function addNote() {
     const newNote = { id: crypto.randomUUID(), text: '' }
     setNotes((prev) => [newNote, ...prev])
@@ -243,7 +241,6 @@ function App() {
     
     // הוספת הודעה
     setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted successfully');
-=======
   async function deleteNote(id) {
     // 1. קריאה לשרת
     try {
@@ -263,7 +260,6 @@ function App() {
     } catch (err) {
       console.error("שגיאה במחיקת פתק:", err);
     }
->>>>>>> 34165093750e05146caffb2ae9b523eddce6daf7
   }
   
   const deleteTask = async (id) => {
@@ -344,17 +340,14 @@ function App() {
     if (!password) return setAuthError('Please enter password.');
 
     try {
-<<<<<<< HEAD
+
       const data = await apiLogin({ email, password })
       setSessionEmail(email)
       setUser(data.user?.name || data.user?.user_email || email)
       setTasks([])
       setNotes(loadUserNotes(email))
       setView('tasks')
-=======
-      const data = await apiLogin({ email, password });
-      setSessionEmail(email);
-      setUser(data.user?.name || null);
+
       
       // טעינה מהשרת
       const [tasksRes, notesRes] = await Promise.all([
@@ -368,7 +361,6 @@ function App() {
       setTasks(tasksData.tasks || []);
       setNotes(notesData.notes || []);
       setView('tasks');
->>>>>>> 34165093750e05146caffb2ae9b523eddce6daf7
     } catch (err) {
       setAuthError(err.message || 'Invalid email or password.');
     }
@@ -980,5 +972,5 @@ async function updateNote(id, text) {
     </div>
   )
 }
-
+}
 export default App

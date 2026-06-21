@@ -165,6 +165,7 @@ app.put('/api/tasks/:id', async (req, res) => {
     return res.status(400).json({ error: 'is_completed must be boolean' })
   }
 
+<<<<<<< HEAD
   try {
     const result = await pool.query(
       `UPDATE tasks_data
@@ -208,6 +209,53 @@ app.delete('/api/tasks', async (req, res) => {
   }
 })
 
+=======
+  console.log('DEBUG: תוצאת עדכון סופית:', data);
+  res.json({ success: true, updated: data });
+});// שליפת כל ההערות של משתמש מ-Supabase
+app.get('/api/notes/:email', async (req, res) => {
+  const { email } = req.params;
+  const { data, error } = await supabase.from('notes').select('*').eq('user_email', email);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ notes: data || [] });
+});
+
+// יצירת הערה חדשה ב-Supabase
+app.post('/api/notes', async (req, res) => {
+  const { user_email, text, id } = req.body;
+  
+  // בדיקה לפני שליחה
+  if (!id || !user_email) {
+    return res.status(400).json({ error: "Missing required fields: id or user_email" });
+  }
+
+  console.log("DEBUG: מנסה לשלוח ל-Supabase:", { id, user_email, text });
+  
+  const { data, error } = await supabase.from('notes').insert([{ id, user_email, text }]).select();
+  
+  if (error) {
+    console.error("DEBUG: שגיאת Supabase חמורה:", error); // זה יופיע ב-Logs של Render
+    return res.status(500).json({ error: error.message });
+  }
+  res.json({ note: data[0] });
+});
+// מחיקת הערה מ-Supabase
+app.delete('/api/notes/:id', async (req, res) => {
+  const { id } = req.params; // שיניתי ל-params כדי שיהיה עקבי עם המשימות
+  const { error } = await supabase.from('notes').delete().eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// בונוס: הוספת עדכון הערה (חשוב מאוד!)
+app.put('/api/notes/:id', async (req, res) => {
+  const { id } = req.params;
+  const { text } = req.body;
+  const { error } = await supabase.from('notes').update({ text }).eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+>>>>>>> 34165093750e05146caffb2ae9b523eddce6daf7
 // --- Production Frontend Serving ---
 const distPath = path.join(globalThis.process?.cwd?.() || '.', 'dist');
 app.use(express.static(distPath));

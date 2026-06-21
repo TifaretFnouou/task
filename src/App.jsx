@@ -221,6 +221,7 @@ function App() {
       console.error('שגיאה בשמירה לשרת:', err)
     }
   }
+<<<<<<< HEAD
 
   function addNote() {
     const newNote = { id: crypto.randomUUID(), text: '' }
@@ -242,17 +243,29 @@ function App() {
     
     // הוספת הודעה
     setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted successfully');
+=======
+  async function deleteNote(id) {
+    // 1. קריאה לשרת
+    try {
+      await fetch(`https://task-4559.onrender.com/api/notes`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      
+      // 2. עדכון ה-State המקומי רק אם המחיקה בשרת הצליחה
+      setNotes((prev) => {
+        const next = prev.filter((n) => n.id !== id);
+        if (selectedNoteId === id) setSelectedNoteId(next[0]?.id || null);
+        return next;
+      });
+      setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted');
+    } catch (err) {
+      console.error("שגיאה במחיקת פתק:", err);
+    }
+>>>>>>> 34165093750e05146caffb2ae9b523eddce6daf7
   }
-  function addNote() {
-    const newNote = { id: crypto.randomUUID(), text: '' };
-    setNotes((prev) => [newNote, ...prev]);
-    setSelectedNoteId(newNote.id);
-  }
-
-  function updateNote(id, text) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)));
-  }
-
+  
   const deleteTask = async (id) => {
     try {
       await apiDeleteTask(id)
@@ -321,27 +334,82 @@ function App() {
   }
 
   async function login() {
-    setAuthError('')
-    setAuthSuccess('')
+    setAuthError('');
+    setAuthSuccess('');
 
-    const email = normalizeEmail(authEmail)
-    const password = String(authPassword || '')
+    const email = normalizeEmail(authEmail);
+    const password = String(authPassword || '');
 
-    if (!email) return setAuthError('Please enter email.')
-    if (!password) return setAuthError('Please enter password.')
+    if (!email) return setAuthError('Please enter email.');
+    if (!password) return setAuthError('Please enter password.');
 
     try {
+<<<<<<< HEAD
       const data = await apiLogin({ email, password })
       setSessionEmail(email)
       setUser(data.user?.name || data.user?.user_email || email)
       setTasks([])
       setNotes(loadUserNotes(email))
       setView('tasks')
+=======
+      const data = await apiLogin({ email, password });
+      setSessionEmail(email);
+      setUser(data.user?.name || null);
+      
+      // טעינה מהשרת
+      const [tasksRes, notesRes] = await Promise.all([
+        fetch(`https://task-4559.onrender.com/api/tasks/${email}`),
+        fetch(`https://task-4559.onrender.com/api/notes/${email}`)
+      ]);
+      
+      const tasksData = await tasksRes.json();
+      const notesData = await notesRes.json();
+      
+      setTasks(tasksData.tasks || []);
+      setNotes(notesData.notes || []);
+      setView('tasks');
+>>>>>>> 34165093750e05146caffb2ae9b523eddce6daf7
     } catch (err) {
-      setAuthError(err.message || 'Invalid email or password.')
+      setAuthError(err.message || 'Invalid email or password.');
     }
   }
+// --- פונקציות מנוהלות תקינות ---
 
+async function addNote() {
+  const newNote = { id: crypto.randomUUID(), text: '' };
+  setNotes((prev) => [newNote, ...prev]);
+  setSelectedNoteId(newNote.id);
+
+  try {
+    await fetch('https://task-4559.onrender.com/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        id: newNote.id, 
+        user_email: getSessionEmail(), 
+        text: '' 
+      }),
+    });
+    setTaskToast(lang === 'he' ? 'פתק חדש נוסף' : 'New note added');
+  } catch (err) {
+    console.error("שגיאה בשמירת פתק:", err);
+  }
+}
+
+async function updateNote(id, text) {
+  // עדכון מקומי מהיר (Optimistic update)
+  setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)));
+
+  try {
+    await fetch(`https://task-4559.onrender.com/api/notes/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+  } catch (err) {
+    console.error("שגיאה בעדכון פתק בשרת:", err);
+  }
+}
   async function forgotPassword() {
     setAuthError('')
     setAuthSuccess('')

@@ -1,119 +1,193 @@
 import express from 'express';
 import cors from 'cors';
-import { createClient } from '@supabase/supabase-js';
+import pg from 'pg';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { Pool } = pg;
+const pool = new Pool({
+  connectionString: "postgresql://neondb_owner:npg_R0CEPg8FVDlX@ep-floral-bird-aiowohzr.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require",
+  ssl: { rejectUnauthorized: false }
+});
+
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
-// חיבור ל-Supabase
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+app.use(cors({
+  origin: '*', // מאפשר גישה מכל מקור
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));app.use(express.json());
 
 // --- API Endpoints ---
-app.post('/api/register', async (req, res) => {
-  const { email, name, password } = req.body;
-  const { data, error } = await supabase.from('users').insert([{ email, name, password }]).select();
-  if (error) return res.status(409).json({ error: error.message });
-  res.json({ user: data[0] });
-});
-// בתוך ה-DELETE בשרת:
-app.delete('/api/tasks', async (req, res) => {
-  const { id } = req.body;
-  const isUuid = String(id).includes('-');
-  
-  const { error } = isUuid 
-    ? await supabase.from('tasks').delete().eq('id_text', id)
-    : await supabase.from('tasks').delete().eq('id', id);
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
-});
+// Login - מתוקן עם שמות העמודות הנכונים
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-  const { data, error } = await supabase.from('users').select('*').eq('email', email).eq('password', password).single();
-  if (error || !data) return res.status(401).json({ error: 'Invalid credentials' });
-  res.json({ user: data });
+  
+  // נדפיס מה הגיע מהדפדפן
+  console.log("DEBUG: Incoming request body:", req.body);
+
+  try {
+    // נדפיס מה אנחנו מחפשים במסד הנתונים
+    console.log("DEBUG: Querying DB for:", { email, password });
+    
+    const result = await pool.query(
+      'SELECT * FROM users_data WHERE user_email = $1 AND user_password = $2', 
+      [email, password]
+    );
+
+    console.log("DEBUG: Query result count:", result.rows.length);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    // נדפיס את השגיאה המדויקת מה-PostgreSQL לטרמינל
+    console.error("DATABASE ERROR DETAILS:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
+// Register - מומלץ להוסיף אם עדיין אין
+app.post('/api/register', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+   // במקום 'INSERT INTO users...'
+const result = await pool.query(
+  'INSERT INTO users_data (user_email, user_password) VALUES ($1, $2) RETURNING *',
+  [email, password]
+);
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("שגיאת Register:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/forgot-password', async (req, res) => {
+  const { email, newPassword } = req.body
+  if (!email || !newPassword) {
+    return res.status(400).json({ error: 'email and newPassword are required' })
+  }
+
+  try {
+    const result = await pool.query(
+      'UPDATE users_data SET user_password = $1 WHERE user_email = $2 RETURNING user_email',
+      [newPassword, email],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    res.json({ message: 'Password updated successfully' })
+  } catch (err) {
+    console.error('Forgot password error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.get('/api/users', async (_req, res) => {
+  try {
+    const result = await pool.query('SELECT user_email FROM users_data ORDER BY user_email ASC')
+    res.json({ users: result.rows })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
 
 app.get('/api/tasks/:email', async (req, res) => {
-  const { email } = req.params;
-  const { data, error } = await supabase.from('tasks').select('*').eq('user_email', email);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ tasks: data || [] });
-});
+  const { email } = req.params
+  try {
+    const result = await pool.query(
+      'SELECT id, id_text, user_email, task_name, is_completed, due_at FROM tasks_data WHERE user_email = $1 ORDER BY id DESC',
+      [email],
+    )
+    res.json({ tasks: result.rows })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
 
 app.post('/api/tasks', async (req, res) => {
-  // תוספת: הוספתי את due_at לקבלת הנתונים מה-Body
-  const { user_email, task_name, due_at } = req.body;
-  // תוספת: הוספתי את due_at לאובייקט ה-insert
-  const { data, error } = await supabase.from('tasks').insert([{ user_email, task_name, is_completed: false, due_at }]).select();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ task: data[0] });
-});
+  const { user_email, task_name, due_at } = req.body
+  if (!user_email || !task_name) {
+    return res.status(400).json({ error: 'user_email and task_name are required' })
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO tasks_data (id_text, user_email, task_name, is_completed, due_at)
+       VALUES (gen_random_uuid()::text, $1, $2, false, $3)
+       RETURNING id, id_text, user_email, task_name, is_completed, due_at`,
+      [user_email, task_name, due_at || null],
+    )
+    res.status(201).json({ task: result.rows[0] })
+  } catch (err) {
+    console.error('Create task error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
 
 app.put('/api/tasks/:id', async (req, res) => {
-  const { id } = req.params;
-  const { is_completed } = req.body;
-  const status = is_completed === true || is_completed === 'true';
+  const { id } = req.params
+  const { is_completed } = req.body
 
-  console.log(`DEBUG: מנסה לעדכן את ID: ${id} לסטטוס: ${status}`);
-
-  // ננסה לעדכן קודם לפי id_text (כי זה מה שאנחנו משתמשים בו)
-  let { data, error } = await supabase
-    .from('tasks')
-    .update({ is_completed: status })
-    .eq('id_text', id)
-    .select();
-
-  // אם לא מצאנו, ננסה לפי id מספרי (למקרה שזה משימה ישנה)
-  // ... אחרי הניסיון הראשון עם id_text ...
-
-// אם לא מצאנו וגם לא קיבלנו שגיאה, ננסה לפי id מספרי רק אם ה-ID הוא מספר
-if (!error && (!data || data.length === 0)) {
-  const numericId = parseInt(id); // ננסה להפוך למספר
-  
-  if (!isNaN(numericId)) { // נבדוק אם זה באמת מספר תקין
-      console.log("DEBUG: מנסה לפי id מספרי:", numericId);
-      ({ data, error } = await supabase
-          .from('tasks')
-          .update({ is_completed: status })
-          .eq('id', numericId) // נשתמש במספר ולא ב-UUID
-          .select());
-  } else {
-      console.log("DEBUG: ה-ID אינו מספר, לא ניתן לעדכן לפי id מספרי.");
-  }
-}
-
-  if (error) {
-    console.error('DEBUG: שגיאת DB:', error);
-    return res.status(500).json({ error: error.message });
+  if (typeof is_completed !== 'boolean') {
+    return res.status(400).json({ error: 'is_completed must be boolean' })
   }
 
-  console.log('DEBUG: תוצאת עדכון סופית:', data);
-  res.json({ success: true, updated: data });
-});
+  try {
+    const result = await pool.query(
+      `UPDATE tasks_data
+       SET is_completed = $1
+       WHERE id::text = $2 OR id_text = $2
+       RETURNING id, id_text, user_email, task_name, is_completed, due_at`,
+      [is_completed, id],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found' })
+    }
+
+    res.json({ task: result.rows[0] })
+  } catch (err) {
+    console.error('Update task error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.delete('/api/tasks', async (req, res) => {
+  const { id } = req.body
+  if (!id) {
+    return res.status(400).json({ error: 'id is required' })
+  }
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM tasks_data WHERE id::text = $1 OR id_text = $1 RETURNING id, id_text',
+      [id],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found' })
+    }
+
+    res.json({ success: true, deleted: result.rows[0] })
+  } catch (err) {
+    console.error('Delete task error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // --- Production Frontend Serving ---
-const distPath = path.join(process.cwd(), 'dist');
-
-// הגשת קבצים סטטיים מהתיקייה שנוצרה ב-build
+const distPath = path.join(globalThis.process?.cwd?.() || '.', 'dist');
 app.use(express.static(distPath));
 
-// ניתוב מותאם אישית (Middleware) במקום app.get('*')
 app.use((req, res, next) => {
-  // אם הבקשה מיועדת ל-API, דלג על הטיפול הזה
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-  // לכל בקשה אחרת, הגש את ה-index.html של ה-React
+  if (req.path.startsWith('/api')) return next();
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-const port = process.env.PORT || 3000;
+const port = globalThis.process?.env?.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
-
-export default app;

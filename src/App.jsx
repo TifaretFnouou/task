@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-import { loadUserTasks, saveUserTasks, loadUserNotes, saveUserNotes } from './userTasksStore'
+import { loadUserTasks, loadUserNotes } from './userTasksStore'
 import StatsPanel from './StatsPanel'
 
 import { getUserByEmail, setSessionEmail, getSessionEmail, clearSession } from './db'
-import { apiRegister, apiLogin, apiForgotPassword, apiUpdateTask } from './api'
+import {
+  apiRegister,
+  apiLogin,
+  apiForgotPassword,
+  apiUpdateTask,
+  apiGetTasks,
+  apiCreateTask,
+  apiDeleteTask,
+} from './api'
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase()
 }
@@ -132,13 +140,12 @@ function App() {
       } 
 
       try {
-        const res = await fetch(`/api/tasks/${email}`)
-        const data = await res.json()
+        const data = await apiGetTasks(email)
         if (data.tasks) {
           setTasks(
             data.tasks.map((task) => ({
-              text: task.task_name, // <--- זו השורה הבעייתית
-              id: task.id_text || task.id, // זה ייתן עדיפות ל-UUID אם קיים              text: task.task_name,
+              text: task.task_name,
+              id: task.id_text || task.id,
               done: Boolean(task.is_completed),
               dueAt: task.due_at || null,
             })),
@@ -149,9 +156,16 @@ function App() {
       }
     }
 
-    if (user) fetchTasksFromDB()
-      else setIsLoading(false); // אם המשתמש לא מחובר, אין מה לטעון
-  }, [user])
+    if (user) {
+      fetchTasksFromDB()
+      return
+    }
+
+    if (isLoading) {
+      const timeout = window.setTimeout(() => setIsLoading(false), 0)
+      return () => window.clearTimeout(timeout)
+    }
+  }, [user, isLoading])
 
   const filtered = useMemo(() => {
     if (filter === 'done') return tasks.filter((t) => t.done)
@@ -172,11 +186,7 @@ function App() {
       setTaskToast(lang === 'he' ? 'כל הכבוד! משימה הושלמה' : 'Great job! Task completed');
     }
     try {
-      await fetch(`https://task-4559.onrender.com/api/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_completed: newDoneStatus }),
-      });
+      await apiUpdateTask(id, { is_completed: newDoneStatus })
     } catch (err) {
       console.error('שגיאה בעדכון השרת:', err);
       // אם נכשל, נחזיר את המצב הקודם
@@ -200,19 +210,25 @@ function App() {
     setTimeDraft('');
 
     try {
-      await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_email: getSessionEmail(),
-          task_name: text,
-          due_at: dueAt,
-        }),
-      });
+      await apiCreateTask({
+        user_email: getSessionEmail(),
+        task_name: text,
+        due_at: dueAt,
+      })
       // אופציונלי: אפשר לקרוא ל-fetchTasksFromDB() כאן כדי לרענן את ה-ID מהשרת
     } catch (err) {
-      console.error('שגיאה בשמירה לשרת:', err);
+      console.error('שגיאה בשמירה לשרת:', err)
     }
+  }
+
+  function addNote() {
+    const newNote = { id: crypto.randomUUID(), text: '' }
+    setNotes((prev) => [newNote, ...prev])
+    setSelectedNoteId(newNote.id)
+  }
+
+  function updateNote(id, text) {
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)))
   }
   function deleteNote(id) {
     setNotes((prev) => {
@@ -225,23 +241,14 @@ function App() {
   }
   const deleteTask = async (id) => {
     try {
-      const response = await fetch(`https://task-4559.onrender.com/api/tasks`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id })
-      });
-      
-      if (response.ok) {
-        setTasks((prev) => prev.filter((t) => t.id !== id));
-        setTaskToast(lang === 'he' ? 'המשימה נמחקה בהצלחה' : 'Task deleted successfully');
-        console.log("המשימה נמחקה בהצלחה!");
-      } else {
-        console.error("שגיאה במחיקה מהשרת");
-      }
+      await apiDeleteTask(id)
+      setTasks((prev) => prev.filter((t) => t.id !== id))
+      setTaskToast(lang === 'he' ? 'המשימה נמחקה בהצלחה' : 'Task deleted successfully')
+      console.log('המשימה נמחקה בהצלחה!')
     } catch (error) {
-      console.error("שגיאה במחיקה:", error);
+      console.error('שגיאה במחיקה:', error)
     }
-  };
+  }
   function createNoteAfter(noteId) {
     const newNote = { id: crypto.randomUUID(), text: '' }
     setNotes((prev) => {

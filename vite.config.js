@@ -7,8 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://task-4559.onrender.com',
-        changeOrigin: true,
+        target: 'http://localhost:3000', // שינינו לשרת המקומי        changeOrigin: true,
       }
     }
   }

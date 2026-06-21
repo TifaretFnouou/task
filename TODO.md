@@ -1,5 +1,9 @@
 - [x] Update addTask in src/App.jsx to async with optimistic UI + server POST
 - [x] Add fetchTasksFromDB useEffect on user login
 - [x] Persist task completion to DB in toggleTask via PUT /api/tasks/:id
-- [ ] Run critical-path check (add task flow + complete task sync)
+- [ ] Align frontend API client with new database-backed backend
+- [ ] Complete missing API endpoints in api/index.js for new DB flow
+- [ ] Fix App.jsx inconsistencies (API usage + missing note handlers)
+- [ ] Update api/test-connection.js to validate new DB tables
+- [ ] Run critical-path check (add/toggle/delete task sync with DB)
 - [ ] Verify no basic build/lint issues

@@ -4,8 +4,15 @@ import pg from 'pg';
 import path from 'path';
 
 const { Pool } = pg;
+
+const DATABASE_URL =
+  globalThis.process?.env?.DATABASE_URL ||
+  "postgresql://neondb_owner:npg_R0CEPg8FVDlX@ep-floral-bird-aiowohzr.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require";
+
+const COMMIT_SHA = globalThis.process?.env?.RENDER_GIT_COMMIT || globalThis.process?.env?.COMMIT_SHA || 'local-dev';
+
 const pool = new Pool({
-  connectionString: "postgresql://neondb_owner:npg_R0CEPg8FVDlX@ep-floral-bird-aiowohzr.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require",
+  connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
@@ -86,6 +93,27 @@ app.post('/api/forgot-password', async (req, res) => {
     res.status(500).json({ error: err.message })
   }
 })
+
+app.get('/api/health', async (_req, res) => {
+  try {
+    const db = await pool.query('SELECT NOW() AS now');
+    res.json({
+      ok: true,
+      service: 'task-4559-api',
+      commit: COMMIT_SHA,
+      db: 'connected',
+      now: db.rows?.[0]?.now || null,
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      service: 'task-4559-api',
+      commit: COMMIT_SHA,
+      db: 'disconnected',
+      error: err.message,
+    });
+  }
+});
 
 app.get('/api/users', async (_req, res) => {
   try {
@@ -190,4 +218,6 @@ app.use((req, res, next) => {
 });
 
 const port = globalThis.process?.env?.PORT || 3000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => {
+  console.log(`Server running on port ${port} | commit=${COMMIT_SHA}`);
+});

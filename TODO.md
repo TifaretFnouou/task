@@ -1,9 +1,14 @@
 - [x] Audit modified files and identify root causes for auth/register failures
-- [ ] Fix malformed Vite proxy config in `vite.config.js`
-- [ ] Ensure API server on :3000 serves updated routes
-- [ ] Run API curl tests for auth/users/tasks endpoints (happy + basic error paths)
-- [ ] Run DB connectivity check via `api/test-connection.js`
-- [ ] Run `npm run lint`
-- [ ] Run `npm run build`
-- [ ] Re-test frontend runtime connectivity assumptions
-- [ ] Commit final stability fixes
+- [x] Fix malformed Vite proxy config in `vite.config.js`
+- [x] Ensure API server on :3000 serves updated routes
+- [x] Run API curl tests for auth/users/tasks endpoints (happy + basic error paths)
+- [x] Run DB connectivity check via `api/test-connection.js`
+- [x] Run `npm run lint`
+- [x] Run `npm run build`
+- [x] Re-test frontend runtime connectivity assumptions
+- [x] Commit final stability fixes
+- [ ] Move API DB connection to `DATABASE_URL` env (Render-safe)
+- [ ] Add `/api/health` endpoint with commit/version diagnostics
+- [ ] Log startup metadata (port + commit SHA)
+- [ ] Run `npm run lint` and `npm run build` after diagnostics changes
+- [ ] Commit diagnostics/deploy fix

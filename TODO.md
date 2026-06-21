@@ -1,5 +1,14 @@
-- [x] Update addTask in src/App.jsx to async with optimistic UI + server POST
-- [x] Add fetchTasksFromDB useEffect on user login
-- [x] Persist task completion to DB in toggleTask via PUT /api/tasks/:id
-- [ ] Run critical-path check (add task flow + complete task sync)
-- [ ] Verify no basic build/lint issues
+- [x] Audit modified files and identify root causes for auth/register failures
+- [x] Fix malformed Vite proxy config in `vite.config.js`
+- [x] Ensure API server on :3000 serves updated routes
+- [x] Run API curl tests for auth/users/tasks endpoints (happy + basic error paths)
+- [x] Run DB connectivity check via `api/test-connection.js`
+- [x] Run `npm run lint`
+- [x] Run `npm run build`
+- [x] Re-test frontend runtime connectivity assumptions
+- [x] Commit final stability fixes
+- [ ] Move API DB connection to `DATABASE_URL` env (Render-safe)
+- [ ] Add `/api/health` endpoint with commit/version diagnostics
+- [ ] Log startup metadata (port + commit SHA)
+- [ ] Run `npm run lint` and `npm run build` after diagnostics changes
+- [ ] Commit diagnostics/deploy fix

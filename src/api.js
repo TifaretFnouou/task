@@ -2,7 +2,7 @@ const API_BASE = '/api'
 
 async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   })
 
@@ -37,9 +37,28 @@ export function apiForgotPassword(payload) {
 export function apiGetUsers() {
   return request('/users')
 }
+
+export function apiGetTasks(email) {
+  return request(`/tasks/${encodeURIComponent(email)}`)
+}
+
+export function apiCreateTask(payload) {
+  return request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function apiUpdateTask(id, payload) {
   return request(`/tasks/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
+  })
+}
+
+export function apiDeleteTask(id) {
+  return request('/tasks', {
+    method: 'DELETE',
+    body: JSON.stringify({ id }),
   })
 }

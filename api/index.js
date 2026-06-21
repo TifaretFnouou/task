@@ -100,7 +100,7 @@ app.get('/api/tasks/:email', async (req, res) => {
   const { email } = req.params
   try {
     const result = await pool.query(
-      'SELECT id, id_text, user_email, task_name, is_completed, due_at FROM tasks_data WHERE user_email = $1 ORDER BY id DESC',
+      'SELECT id, user_email, task_name, is_completed FROM tasks_data WHERE user_email = $1 ORDER BY id DESC',
       [email],
     )
     res.json({ tasks: result.rows })
@@ -110,17 +110,17 @@ app.get('/api/tasks/:email', async (req, res) => {
 })
 
 app.post('/api/tasks', async (req, res) => {
-  const { user_email, task_name, due_at } = req.body
+  const { user_email, task_name } = req.body
   if (!user_email || !task_name) {
     return res.status(400).json({ error: 'user_email and task_name are required' })
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO tasks_data (id_text, user_email, task_name, is_completed, due_at)
-       VALUES (gen_random_uuid()::text, $1, $2, false, $3)
-       RETURNING id, id_text, user_email, task_name, is_completed, due_at`,
-      [user_email, task_name, due_at || null],
+      `INSERT INTO tasks_data (user_email, task_name, is_completed)
+       VALUES ($1, $2, false)
+       RETURNING id, user_email, task_name, is_completed`,
+      [user_email, task_name],
     )
     res.status(201).json({ task: result.rows[0] })
   } catch (err) {
@@ -141,8 +141,8 @@ app.put('/api/tasks/:id', async (req, res) => {
     const result = await pool.query(
       `UPDATE tasks_data
        SET is_completed = $1
-       WHERE id::text = $2 OR id_text = $2
-       RETURNING id, id_text, user_email, task_name, is_completed, due_at`,
+       WHERE id::text = $2
+       RETURNING id, user_email, task_name, is_completed`,
       [is_completed, id],
     )
 
@@ -165,7 +165,7 @@ app.delete('/api/tasks', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'DELETE FROM tasks_data WHERE id::text = $1 OR id_text = $1 RETURNING id, id_text',
+      'DELETE FROM tasks_data WHERE id::text = $1 RETURNING id',
       [id],
     )
 

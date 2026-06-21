@@ -1,9 +1,9 @@
-- [x] Update addTask in src/App.jsx to async with optimistic UI + server POST
-- [x] Add fetchTasksFromDB useEffect on user login
-- [x] Persist task completion to DB in toggleTask via PUT /api/tasks/:id
-- [ ] Align frontend API client with new database-backed backend
-- [ ] Complete missing API endpoints in api/index.js for new DB flow
-- [ ] Fix App.jsx inconsistencies (API usage + missing note handlers)
-- [ ] Update api/test-connection.js to validate new DB tables
-- [ ] Run critical-path check (add/toggle/delete task sync with DB)
-- [ ] Verify no basic build/lint issues
+- [x] Audit modified files and identify root causes for auth/register failures
+- [ ] Fix malformed Vite proxy config in `vite.config.js`
+- [ ] Ensure API server on :3000 serves updated routes
+- [ ] Run API curl tests for auth/users/tasks endpoints (happy + basic error paths)
+- [ ] Run DB connectivity check via `api/test-connection.js`
+- [ ] Run `npm run lint`
+- [ ] Run `npm run build`
+- [ ] Re-test frontend runtime connectivity assumptions
+- [ ] Commit final stability fixes

@@ -48,22 +48,15 @@ app.post('/api/register', async (req, res) => {
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
+// --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
-
-// 1. קודם כל נגיש קבצים סטטיים מה-React
 app.use(express.static(distPath));
 
-// 2. נגדיר מסלול יחיד שתופס הכל, אבל מוודא ש-API לא נחסם
-app.get('*', (req, res, next) => {
-  // אם הבקשה מתחילה ב-/api, תעבור הלאה (ל-Endpoints של ה-API שהגדרנו)
+// במקום app.get('*', ... נשתמש ב-middleware שמטפל בכל נתיב שלא התחיל ב-/api
+app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
-    return next();
+    return next(); // תמשיך לטיפול ב-API
   }
-  // אחרת, תגיש את האתר (index.html)
+  // אם לא API, תגיש את index.html
   res.sendFile(path.join(distPath, 'index.html'));
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
 });

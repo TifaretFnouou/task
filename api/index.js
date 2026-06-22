@@ -47,16 +47,15 @@ app.post('/api/register', async (req, res) => {
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
-// --- Production Frontend Serving ---
-// --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
-// במקום app.get('*', ... נשתמש ב-middleware שמטפל בכל נתיב שלא התחיל ב-/api
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return next(); // תמשיך לטיפול ב-API
-  }
-  // אם לא API, תגיש את index.html
+// זה הפתרון התקני שעוקף את הבעיה עם ה-כוכבית:
+app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

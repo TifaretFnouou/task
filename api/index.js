@@ -47,11 +47,19 @@ app.post('/api/register', async (req, res) => {
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
+// --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
+
+// 1. קודם כל נגיש קבצים סטטיים מה-React
 app.use(express.static(distPath));
 
-// זה הפתרון התקני שעוקף את הבעיה עם ה-כוכבית:
-app.get(/^(?!\/api).*/, (req, res) => {
+// 2. נגדיר מסלול יחיד שתופס הכל, אבל מוודא ש-API לא נחסם
+app.get('*', (req, res, next) => {
+  // אם הבקשה מתחילה ב-/api, תעבור הלאה (ל-Endpoints של ה-API שהגדרנו)
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  // אחרת, תגיש את האתר (index.html)
   res.sendFile(path.join(distPath, 'index.html'));
 });
 

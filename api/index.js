@@ -43,9 +43,16 @@ app.post('/api/register', async (req, res) => {
 // ... (כאן תמשיך עם שאר ה-Endpoints של ה-Tasks שלך) ...
 
 // --- Production Frontend Serving ---
+// --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
+// שנה את השורה הזו לזה:
+app.get('/(.*)', (req, res) => {
+  // נמנע מלהגיש את ה-HTML לבקשות API
+  if (req.path.startsWith('/api')) return;
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api')) return;
   res.sendFile(path.join(distPath, 'index.html'));

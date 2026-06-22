@@ -46,13 +46,16 @@ app.post('/api/register', async (req, res) => {
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
+// --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
-// נשתמש בנתיב שתופס הכל בלי סימנים מיוחדים שמרגיזים את הספריה
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return next(); // תמשיך לטיפול של ה-API
-  }
+// זה הפתרון התקני שעוקף את הבעיה עם ה-כוכבית:
+app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

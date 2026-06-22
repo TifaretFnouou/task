@@ -44,21 +44,15 @@ app.post('/api/register', async (req, res) => {
 
 // --- Production Frontend Serving ---
 // --- Production Frontend Serving ---
+// --- Production Frontend Serving ---
+// --- Production Frontend Serving ---
 const distPath = path.join(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
-// שנה את השורה הזו לזה:
-app.get('/(.*)', (req, res) => {
-  // נמנע מלהגיש את ה-HTML לבקשות API
-  if (req.path.startsWith('/api')) return;
+// נשתמש בנתיב שתופס הכל בלי סימנים מיוחדים שמרגיזים את הספריה
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next(); // תמשיך לטיפול של ה-API
+  }
   res.sendFile(path.join(distPath, 'index.html'));
-});
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api')) return;
-  res.sendFile(path.join(distPath, 'index.html'));
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
 });

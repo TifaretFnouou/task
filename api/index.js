@@ -165,7 +165,8 @@ app.put('/api/tasks/:id', async (req, res) => {
     return res.status(400).json({ error: 'is_completed must be boolean' })
   }
 
-<<<<<<< HEAD
+
+
   try {
     const result = await pool.query(
       `UPDATE tasks_data
@@ -209,10 +210,10 @@ app.delete('/api/tasks', async (req, res) => {
   }
 })
 
-=======
+
   console.log('DEBUG: תוצאת עדכון סופית:', data);
   res.json({ success: true, updated: data });
-});// שליפת כל ההערות של משתמש מ-Supabase
+;// שליפת כל ההערות של משתמש מ-Supabase
 app.get('/api/notes/:email', async (req, res) => {
   const { email } = req.params;
   const { data, error } = await supabase.from('notes').select('*').eq('user_email', email);
@@ -255,7 +256,6 @@ app.put('/api/notes/:id', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
->>>>>>> 34165093750e05146caffb2ae9b523eddce6daf7
 // --- Production Frontend Serving ---
 const distPath = path.join(globalThis.process?.cwd?.() || '.', 'dist');
 app.use(express.static(distPath));

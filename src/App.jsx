@@ -35,7 +35,7 @@ function App() {
   useEffect(() => {
     localStorage.setItem('taskease_theme', theme)
   }, [theme])
-
+  const [showPassword, setShowPassword] = useState(false);
   const t = useMemo(() => {
     const dict = {
       he: {
@@ -221,26 +221,7 @@ function App() {
       console.error('שגיאה בשמירה לשרת:', err)
     }
   }
-  function addNote() {
-    const newNote = { id: crypto.randomUUID(), text: '' }
-    setNotes((prev) => [newNote, ...prev])
-    setSelectedNoteId(newNote.id)
-  }
 
-  function updateNote(id, text) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)))
-  }
-  function deleteNote(id) {
-    setNotes((prev) => {
-      const next = prev.filter((n) => n.id !== id);
-      if (selectedNoteId === id) {
-        setSelectedNoteId(next[0]?.id || null);
-      }
-      return next;
-    });
-    
-    // הוספת הודעה
-    setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted successfully');
   async function deleteNote(id) {
     // 1. קריאה לשרת
     try {
@@ -527,28 +508,46 @@ async function updateNote(id, text) {
               {authMode !== 'forgot' ? (
                 <label className="field">
                   <span>{t.password}</span>
-                  <input
-                    className="authInput"
-                    value={authPassword}
-                    placeholder="••••"
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    type="password"
-                    autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      className="authInput"
+                      value={authPassword}
+                      placeholder="••••"
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ position: 'absolute', left: '10px', top: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                    >
+                      {showPassword ? "👁️" : "🙈"}
+                    </button>
+                  </div>
                 </label>
               ) : null}
 
               {authMode === 'forgot' ? (
                 <label className="field">
                   <span>{lang === 'en' ? 'New password' : 'סיסמה חדשה'}</span>
-                  <input
-                    className="authInput"
-                    value={resetPassword}
-                    placeholder="••••"
-                    onChange={(e) => setResetPassword(e.target.value)}
-                    type="password"
-                    autoComplete="new-password"
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      className="authInput"
+                      value={resetPassword}
+                      placeholder="••••"
+                      onChange={(e) => setResetPassword(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ position: 'absolute', left: '10px', top: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                    >
+                      {showPassword ? "👁️" : "🙈"}
+                    </button>
+                  </div>
                 </label>
               ) : null}
 
@@ -920,57 +919,14 @@ async function updateNote(id, text) {
                     <span>{lang === 'en' ? 'Done tasks' : 'משימות הושלמו'}</span>
                     <strong>{tasks.filter((x) => x.done).length}</strong>
                   </div>
-                  <div className="profileRow">
-                    <span>{lang === 'en' ? 'Active tasks' : 'משימות פעילות'}</span>
-                    <strong>{tasks.filter((x) => !x.done).length}</strong>
-                  </div>
-                  <div className="profileRow">
-                    <span>{lang === 'en' ? 'Notes' : 'הערות'}</span>
-                    <strong>{notes.length}</strong>
-                  </div>
-                </div>
-              </article>
-
-              <article className="profileCard">
-                <h3>{lang === 'en' ? 'Preferences' : 'העדפות'}</h3>
-                <div className="profileActions">
-                  <button
-                    type="button"
-                    className="ghostBtn"
-                    onClick={() => setLang((p) => (p === 'he' ? 'en' : 'he'))}
-                  >
-                    {lang === 'en' ? 'Switch language' : 'החלפת שפה'}
-                  </button>
-                  <button
-                    type="button"
-                    className="ghostBtn"
-                    onClick={() => setTheme((p) => (p === 'dark' ? 'light' : 'dark'))}
-                  >
-                    {lang === 'en' ? 'Switch theme' : 'החלפת ערכת נושא'}
-                  </button>
                 </div>
               </article>
             </div>
           </section>
         )}
       </main>
-
-      <footer className="footer">
-  <span>@tifaret 2026 </span>
-
-  <a
-    href="https://drive.google.com/file/d/1nkHSB4BHNLffNERGIiypv-eaLLHDqyAW/view?usp=drive_link"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="resume-btn"
-    aria-label="View My Resume"
-    title="View My Resume"
-  >
-    View My Resume
-  </a>
-</footer>
     </div>
   )
 }
-}
+
 export default App

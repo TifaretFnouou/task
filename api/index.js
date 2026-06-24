@@ -6,8 +6,6 @@ import path from 'path';
 const { Pool } = pg;
 
 const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_R0CEPg8FVDlX@ep-floral-bird-aiowohzr.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require";
-const COMMIT_SHA = process.env.RENDER_GIT_COMMIT || 'local-dev';
-
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -40,26 +38,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// ... (כאן תמשיך עם שאר ה-Endpoints של ה-Tasks שלך) ...
-
-// --- Production Frontend Serving ---
-// --- Production Frontend Serving ---
-// --- Production Frontend Serving ---
-// --- Production Frontend Serving ---
-// --- Production Frontend Serving ---
-const distPath = path.join(process.cwd(), 'dist');
-app.use(express.static(distPath));
-
-// זה הפתרון התקני שעוקף את הבעיה עם ה-כוכבית:
-app.get(/^(?!\/api).*/, (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
-// הוספת משימות
+// ה-Endpoints של ה-Tasks וה-Notes (במיקום הנכון!)
 app.get('/api/tasks/:email', async (req, res) => {
   const { email } = req.params;
   try {
@@ -70,7 +49,6 @@ app.get('/api/tasks/:email', async (req, res) => {
   }
 });
 
-// הוספת פתקים
 app.get('/api/notes/:email', async (req, res) => {
   const { email } = req.params;
   try {
@@ -79,4 +57,17 @@ app.get('/api/notes/:email', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// --- Production Frontend Serving ---
+const distPath = path.join(process.cwd(), 'dist');
+app.use(express.static(distPath));
+
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

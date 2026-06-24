@@ -59,3 +59,24 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+// הוספת משימות
+app.get('/api/tasks/:email', async (req, res) => {
+  const { email } = req.params;
+  try {
+    const result = await pool.query('SELECT * FROM tasks WHERE user_email = $1', [email]);
+    res.json({ tasks: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// הוספת פתקים
+app.get('/api/notes/:email', async (req, res) => {
+  const { email } = req.params;
+  try {
+    const result = await pool.query('SELECT * FROM notes WHERE user_email = $1', [email]);
+    res.json({ notes: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});

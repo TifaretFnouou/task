@@ -49,11 +49,21 @@ export function apiCreateTask(payload) {
   })
 }
 
-export function apiUpdateTask(id, payload) {
-  return request(`/tasks/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  })
+export async function apiUpdateTask(id, payload) {
+  try {
+    return await request(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    })
+  } catch (err) {
+    if (String(err?.message || '').includes('Request failed')) {
+      return request('/tasks', {
+        method: 'PUT',
+        body: JSON.stringify({ id, ...payload }),
+      })
+    }
+    throw err
+  }
 }
 
 export function apiDeleteTask(id) {

@@ -83,6 +83,21 @@ app.put('/api/tasks/:id', async (req, res) => {
   }
 });
 
+app.put('/api/tasks', async (req, res) => {
+  const { id, is_completed } = req.body;
+  if (!id) return res.status(400).json({ error: 'id is required' });
+  try {
+    const result = await pool.query(
+      'UPDATE tasks_data SET is_completed = $1 WHERE id = $2 RETURNING id, user_email, task_name, is_completed',
+      [Boolean(is_completed), id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Task not found' });
+    res.json({ task: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/tasks', async (req, res) => {
   const { id } = req.body;
   if (!id) return res.status(400).json({ error: 'id is required' });

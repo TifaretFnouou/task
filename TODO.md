@@ -1,5 +1,8 @@
 - [x] Add PWA install prompt handling in `src/App.jsx`
 - [x] Render install button on home screen when `beforeinstallprompt` is available
 - [x] Add matching install button styles in `src/App.css`
-- [ ] Run critical validation for app startup and install button behavior
-- [ ] Update checklist status and finalize
+- [x] Align manifest icon config to valid 192x192 asset (`/icon-192.png`)
+- [x] Make install button always visible with fallback guidance
+- [x] Harden note delete API flow with fallback endpoint strategy
+- [ ] Run critical + thorough validation (build, manifest/icon curl, notes delete API scenarios)
+- [ ] Commit and push final fixes to git

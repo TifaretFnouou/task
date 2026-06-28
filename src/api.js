@@ -94,9 +94,19 @@ export function apiUpdateNote(id, payload) {
   })
 }
 
-export function apiDeleteNote(id) {
-  return request('/notes', {
-    method: 'DELETE',
-    body: JSON.stringify({ id }),
-  })
+export async function apiDeleteNote(id) {
+  try {
+    return await request('/notes', {
+      method: 'DELETE',
+      body: JSON.stringify({ id }),
+    })
+  } catch (err) {
+    const msg = String(err?.message || '')
+    if (msg.includes('Request failed') || msg.includes('not found') || msg.includes('404')) {
+      return request(`/notes/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+    }
+    throw err
+  }
 }

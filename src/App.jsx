@@ -469,14 +469,35 @@ function App() {
   }, [])
 
   async function handleInstallApp() {
-    if (!deferredPrompt) return
-    deferredPrompt.prompt()
-    try {
-      await deferredPrompt.userChoice
-    } catch {
-      // ignore choice errors
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      try {
+        await deferredPrompt.userChoice
+      } catch {
+        // ignore choice errors
+      }
+      setDeferredPrompt(null)
+      return
     }
-    setDeferredPrompt(null)
+
+    const ua = navigator.userAgent || ''
+    const isIOS = /iPhone|iPad|iPod/i.test(ua)
+    const isSafari = /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua)
+
+    if (isIOS && isSafari) {
+      setTaskToast(
+        lang === 'he'
+          ? 'כדי להתקין: לחצו על שיתוף ואז "הוסף למסך הבית"'
+          : 'To install: tap Share, then "Add to Home Screen"',
+      )
+      return
+    }
+
+    setTaskToast(
+      lang === 'he'
+        ? 'התקנה לא זמינה כרגע בדפדפן הזה'
+        : 'Install is not available in this browser right now',
+    )
   }
 
   const activeCount = tasks.filter((t) => !t.done).length
@@ -772,11 +793,9 @@ function App() {
                 <StatsPanel tasks={tasks} lang={lang} />
               </div>
 
-              {deferredPrompt ? (
-                <button type="button" className="installBtn" onClick={handleInstallApp}>
-                  {lang === 'en' ? 'Install app' : 'התקן את האפליקציה'}
-                </button>
-              ) : null}
+              <button type="button" className="installBtn" onClick={handleInstallApp}>
+                {lang === 'en' ? 'Install app' : 'התקן את האפליקציה'}
+              </button>
             </div>
 
             <div className="heroPanel" role="region" aria-label="Create tasks">

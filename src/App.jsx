@@ -733,20 +733,17 @@ function App() {
               <h1>
                 {lang === 'en' ? (
                   <>
-                    The <span className="accent">clean</span> way
+                    The <span className="accent">easy</span> way
                     <br /> to manage tasks.
                   </>
                 ) : (
-                  <>
-                    הדרך <span className="accent">הנקייה</span>
-                    <br /> לנהל משימות.
-                  </>
+                  <>הדרך הקלה לנהל משימות.</>
                 )}
               </h1>
               <p>
                 {lang === 'en'
-                  ? 'Create a list, mark done, and keep moving. Modern UI in black/white with a pink twist.'
-                  : 'צרו רשימה, סמנו כמושלם והמשיכו קדימה. ממשק מודרני בשחור/לבן עם נגיעה ורודה.'}
+                  ? 'Create a list, mark done, and keep moving.'
+                  : 'צרו רשימה, סמנו כמושלם והמשיכו קדימה'}
               </p>
 
               <div className="heroStats">

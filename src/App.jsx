@@ -462,11 +462,16 @@ function App() {
     function onBeforeInstallPrompt(e) {
       e.preventDefault()
       setDeferredPrompt(e)
+      setTaskToast(
+        lang === 'he'
+          ? 'ניתן להתקין את האפליקציה דרך כפתור "התקן את האפליקציה"'
+          : 'You can install the app using the "Install app" button',
+      )
     }
 
     window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
     return () => window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
-  }, [])
+  }, [lang])
 
   async function handleInstallApp() {
     if (deferredPrompt) {

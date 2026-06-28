@@ -3,6 +3,11 @@
 - [x] Update App.css layout styles for top placement
 - [x] Build and verify (`npm run build`)
 - [x] Commit and push to git
-- [ ] Improve top menu button visual style (language/theme group)
-- [ ] Build and verify (`npm run build`) after style update
-- [ ] Commit and push to git (style polish)
+- [x] Improve top menu button visual style (language/theme group)
+- [x] Build and verify (`npm run build`) after style update
+- [x] Commit and push to git (style polish)
+- [ ] Revert language/theme controls to previous floating position
+- [ ] Move install button to top header menu row
+- [ ] Clean CSS from menuControls/menuPill/menuDivider styles
+- [ ] Build and verify (`npm run build`) after revert
+- [ ] Commit and push to git (revert + install button top)

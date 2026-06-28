@@ -774,6 +774,15 @@
   gap: 8px;
 }
 
+.topControls {
+  position: static;
+  left: auto;
+  bottom: auto;
+  z-index: auto;
+  flex-direction: row;
+  align-items: center;
+}
+
 .taskDoneToast {
   position: fixed;
   top: 86px;

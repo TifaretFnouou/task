@@ -732,6 +732,30 @@ function App() {
             {t.logout}
           </button>
 
+          <div className="floatingControls topControls" aria-label={lang === 'en' ? 'Display controls' : 'בקרות תצוגה'}>
+            <button
+              type="button"
+              className="controlPill"
+              onClick={() => setLang((p) => (p === 'he' ? 'en' : 'he'))}
+              aria-label="Toggle language"
+              title={lang === 'en' ? 'Switch language' : 'החלפת שפה'}
+            >
+              <span className="controlIcon" aria-hidden="true">A</span>
+              <span>{lang === 'he' ? 'EN' : 'עברית'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="controlPill"
+              onClick={() => setTheme((p) => (p === 'dark' ? 'light' : 'dark'))}
+              aria-label="Toggle brightness"
+              title={lang === 'en' ? 'Switch theme' : 'החלפת ערכת נושא'}
+            >
+              <span className="controlIcon" aria-hidden="true">{theme === 'dark' ? '◑' : '◐'}</span>
+              <span>{theme === 'dark' ? 'כהה' : 'בהיר'}</span>
+            </button>
+          </div>
+
           <button
             type="button"
             className={view === 'profile' ? 'userAvatarBtn active' : 'userAvatarBtn'}
@@ -749,30 +773,6 @@ function App() {
           {taskToast}
         </div>
       ) : null}
-
-      <div className="floatingControls" aria-label={lang === 'en' ? 'Display controls' : 'בקרות תצוגה'}>
-        <button
-          type="button"
-          className="controlPill"
-          onClick={() => setLang((p) => (p === 'he' ? 'en' : 'he'))}
-          aria-label="Toggle language"
-          title={lang === 'en' ? 'Switch language' : 'החלפת שפה'}
-        >
-          <span className="controlIcon" aria-hidden="true">A</span>
-          <span>{lang === 'he' ? 'EN' : 'עברית'}</span>
-        </button>
-
-        <button
-          type="button"
-          className="controlPill"
-          onClick={() => setTheme((p) => (p === 'dark' ? 'light' : 'dark'))}
-          aria-label="Toggle brightness"
-          title={lang === 'en' ? 'Switch theme' : 'החלפת ערכת נושא'}
-        >
-          <span className="controlIcon" aria-hidden="true">{theme === 'dark' ? '◑' : '◐'}</span>
-          <span>{theme === 'dark' ? 'כהה' : 'בהיר'}</span>
-        </button>
-      </div>
 
       <main className="main">
         {view === 'tasks' ? (

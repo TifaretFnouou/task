@@ -2,4 +2,7 @@
 - [x] Keep Hebrew/English toggle behavior intact
 - [x] Update App.css layout styles for top placement
 - [x] Build and verify (`npm run build`)
-- [ ] Commit and push to git
+- [x] Commit and push to git
+- [ ] Improve top menu button visual style (language/theme group)
+- [ ] Build and verify (`npm run build`) after style update
+- [ ] Commit and push to git (style polish)

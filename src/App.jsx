@@ -732,10 +732,10 @@ function App() {
             {t.logout}
           </button>
 
-          <div className="floatingControls topControls" aria-label={lang === 'en' ? 'Display controls' : 'בקרות תצוגה'}>
+          <div className="floatingControls topControls menuControls" aria-label={lang === 'en' ? 'Display controls' : 'בקרות תצוגה'}>
             <button
               type="button"
-              className="controlPill"
+              className="controlPill menuPill"
               onClick={() => setLang((p) => (p === 'he' ? 'en' : 'he'))}
               aria-label="Toggle language"
               title={lang === 'en' ? 'Switch language' : 'החלפת שפה'}
@@ -744,9 +744,11 @@ function App() {
               <span>{lang === 'he' ? 'EN' : 'עברית'}</span>
             </button>
 
+            <span className="menuDivider" aria-hidden="true" />
+
             <button
               type="button"
-              className="controlPill"
+              className="controlPill menuPill"
               onClick={() => setTheme((p) => (p === 'dark' ? 'light' : 'dark'))}
               aria-label="Toggle brightness"
               title={lang === 'en' ? 'Switch theme' : 'החלפת ערכת נושא'}

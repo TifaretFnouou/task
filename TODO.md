@@ -6,8 +6,11 @@
 - [x] Improve top menu button visual style (language/theme group)
 - [x] Build and verify (`npm run build`) after style update
 - [x] Commit and push to git (style polish)
-- [ ] Revert language/theme controls to previous floating position
-- [ ] Move install button to top header menu row
-- [ ] Clean CSS from menuControls/menuPill/menuDivider styles
-- [ ] Build and verify (`npm run build`) after revert
-- [ ] Commit and push to git (revert + install button top)
+- [x] Revert language/theme controls to previous floating position
+- [x] Move install button to top header menu row
+- [x] Clean CSS from menuControls/menuPill/menuDivider styles
+- [x] Build and verify (`npm run build`) after revert
+- [x] Commit and push to git (revert + install button top)
+- [ ] Polish install button style in top menu (aligned + professional)
+- [ ] Build and verify (`npm run build`) after install button polish
+- [ ] Commit and push to git (install button polish)

@@ -715,7 +715,8 @@ function App() {
             <div className="heroPanel" role="region" aria-label="Create tasks">
               <div className="panelHeader">
                 <h2>
-                  My tasks{user ? <span className="userName"> · {user}</span> : null}
+                  My tasks
+                  <span className="userName"> · {user || sessionEmail}</span>
                 </h2>
 
                 <div className="segmented" role="tablist" aria-label={lang === 'en' ? 'Filter tasks' : 'סינון משימות'}>

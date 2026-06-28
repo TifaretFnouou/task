@@ -1,17 +1,5 @@
-- [x] Audit modified files and identify root causes for auth/register failures
-- [x] Fix malformed Vite proxy config in `vite.config.js`
-- [x] Ensure API server on :3000 serves updated routes
-- [x] Run API curl tests for auth/users/tasks endpoints (happy + basic error paths)
-- [x] Run DB connectivity check via `api/test-connection.js`
-- [x] Run `npm run lint`
-- [x] Run `npm run build`
-- [x] Re-test frontend runtime connectivity assumptions
-- [x] Commit final stability fixes
-- [ ] Move API DB connection to `DATABASE_URL` env (Render-safe)
-- [ ] Add `/api/health` endpoint with commit/version diagnostics
-- [ ] Log startup metadata (port + commit SHA)
-- [ ] Run `npm run lint` and `npm run build` after diagnostics changes
-- [ ] Fix lint config for Node globals in api files
-- [ ] Fix duplicated API_BASE usage in src/api.js
-- [ ] Re-run lint and build verification
-- [ ] Commit diagnostics/deploy fix
+- [x] Update backend API endpoints in `api/index.js` for full tasks/notes CRUD
+- [x] Refactor frontend data calls in `src/App.jsx` to use local `/api` instead of hardcoded onrender URL
+- [x] Normalize tasks/notes mapping so text renders correctly
+- [x] Run critical-path checks (login, load, create/update/delete task and note)
+- [ ] Commit changes to git

@@ -62,3 +62,28 @@ export function apiDeleteTask(id) {
     body: JSON.stringify({ id }),
   })
 }
+
+export function apiGetNotes(email) {
+  return request(`/notes/${encodeURIComponent(email)}`)
+}
+
+export function apiCreateNote(payload) {
+  return request('/notes', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function apiUpdateNote(id, payload) {
+  return request(`/notes/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function apiDeleteNote(id) {
+  return request('/notes', {
+    method: 'DELETE',
+    body: JSON.stringify({ id }),
+  })
+}

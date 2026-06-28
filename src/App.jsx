@@ -12,6 +12,10 @@ import {
   apiGetTasks,
   apiCreateTask,
   apiDeleteTask,
+  apiGetNotes,
+  apiCreateNote,
+  apiUpdateNote,
+  apiDeleteNote,
 } from './api'
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase()
@@ -223,23 +227,17 @@ function App() {
   }
 
   async function deleteNote(id) {
-    // 1. קריאה לשרת
     try {
-      await fetch(`https://task-4559.onrender.com/api/notes`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      });
-      
-      // 2. עדכון ה-State המקומי רק אם המחיקה בשרת הצליחה
+      await apiDeleteNote(id)
+
       setNotes((prev) => {
-        const next = prev.filter((n) => n.id !== id);
-        if (selectedNoteId === id) setSelectedNoteId(next[0]?.id || null);
-        return next;
-      });
-      setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted');
+        const next = prev.filter((n) => n.id !== id)
+        if (selectedNoteId === id) setSelectedNoteId(next[0]?.id || null)
+        return next
+      })
+      setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted')
     } catch (err) {
-      console.error("שגיאה במחיקת פתק:", err);
+      console.error('שגיאה במחיקת פתק:', err)
     }
   }
   
@@ -331,58 +329,63 @@ function App() {
 
       
       // טעינה מהשרת
-      const [tasksRes, notesRes] = await Promise.all([
-        fetch(`https://task-4559.onrender.com/api/tasks/${email}`),
-        fetch(`https://task-4559.onrender.com/api/notes/${email}`)
-      ]);
-      
-      const tasksData = await tasksRes.json();
-      const notesData = await notesRes.json();
-      
-      setTasks(tasksData.tasks || []);
-      setNotes(notesData.notes || []);
-      setView('tasks');
+      const [tasksData, notesData] = await Promise.all([
+        apiGetTasks(email),
+        apiGetNotes(email),
+      ])
+
+      const normalizedTasks = Array.isArray(tasksData.tasks)
+        ? tasksData.tasks.map((task) => ({
+            id: String(task.id_text || task.id),
+            text: task.task_name ?? task.text ?? '',
+            done: Boolean(task.is_completed ?? task.done),
+            dueAt: task.due_at || null,
+          }))
+        : []
+
+      const normalizedNotes = Array.isArray(notesData.notes)
+        ? notesData.notes.map((note) => ({
+            id: String(note.id),
+            text: note.text ?? '',
+          }))
+        : []
+
+      setTasks(normalizedTasks)
+      setNotes(normalizedNotes)
+      setSelectedNoteId(normalizedNotes[0]?.id || null)
+      setView('tasks')
     } catch (err) {
       setAuthError(err.message || 'Invalid email or password.');
     }
   }
 // --- פונקציות מנוהלות תקינות ---
 
-async function addNote() {
-  const newNote = { id: crypto.randomUUID(), text: '' };
-  setNotes((prev) => [newNote, ...prev]);
-  setSelectedNoteId(newNote.id);
+  async function addNote() {
+    const newNote = { id: crypto.randomUUID(), text: '' }
+    setNotes((prev) => [newNote, ...prev])
+    setSelectedNoteId(newNote.id)
 
-  try {
-    await fetch('https://task-4559.onrender.com/api/notes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        id: newNote.id, 
-        user_email: getSessionEmail(), 
-        text: '' 
-      }),
-    });
-    setTaskToast(lang === 'he' ? 'פתק חדש נוסף' : 'New note added');
-  } catch (err) {
-    console.error("שגיאה בשמירת פתק:", err);
+    try {
+      await apiCreateNote({
+        id: newNote.id,
+        user_email: getSessionEmail(),
+        text: '',
+      })
+      setTaskToast(lang === 'he' ? 'פתק חדש נוסף' : 'New note added')
+    } catch (err) {
+      console.error('שגיאה בשמירת פתק:', err)
+    }
   }
-}
 
-async function updateNote(id, text) {
-  // עדכון מקומי מהיר (Optimistic update)
-  setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)));
+  async function updateNote(id, text) {
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, text } : n)))
 
-  try {
-    await fetch(`https://task-4559.onrender.com/api/notes/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-  } catch (err) {
-    console.error("שגיאה בעדכון פתק בשרת:", err);
+    try {
+      await apiUpdateNote(id, { text })
+    } catch (err) {
+      console.error('שגיאה בעדכון פתק בשרת:', err)
+    }
   }
-}
   async function forgotPassword() {
     setAuthError('')
     setAuthSuccess('')

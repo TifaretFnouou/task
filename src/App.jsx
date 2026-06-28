@@ -21,6 +21,13 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase()
 }
 
+function makeId() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID()
+  }
+  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
 function App() {
   const [lang, setLang] = useState(() => {
     const saved = localStorage.getItem('taskease_lang')
@@ -179,23 +186,30 @@ function App() {
   async function toggleTask(id) {
     const taskToUpdate = tasks.find((t) => t.id === id);
     if (!taskToUpdate) return;
-  
+
     const newDoneStatus = !taskToUpdate.done;
-  
+
     // עדכון מיידי בממשק (Optimistic Update)
-    
-    setTasks((prev) => 
+    setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, done: newDoneStatus } : t))
     );
+
     if (newDoneStatus) {
       setTaskToast(lang === 'he' ? 'כל הכבוד! משימה הושלמה' : 'Great job! Task completed');
     }
+
+    const numericId = Number(id);
+    if (!Number.isInteger(numericId)) {
+      setTaskToast(lang === 'he' ? 'המשימה עדיין נשמרת, נסה שוב בעוד רגע' : 'Task is still syncing, try again in a moment');
+      return;
+    }
+
     try {
-      await apiUpdateTask(id, { is_completed: newDoneStatus })
+      await apiUpdateTask(numericId, { is_completed: newDoneStatus })
     } catch (err) {
       console.error('שגיאה בעדכון השרת:', err);
       // אם נכשל, נחזיר את המצב הקודם
-      setTasks((prev) => 
+      setTasks((prev) =>
         prev.map((t) => (t.id === id ? { ...t, done: !newDoneStatus } : t))
       );
     }
@@ -207,7 +221,8 @@ function App() {
     if (!text) return;
 
     const dueAt = timeText ? timeText : null;
-    const newTask = { id: crypto.randomUUID(), text, done: false, dueAt };
+    const tempId = makeId();
+    const newTask = { id: tempId, text, done: false, dueAt };
 
     // עדכון הממשק
     setTasks((prev) => [...prev, newTask]);
@@ -215,14 +230,22 @@ function App() {
     setTimeDraft('');
 
     try {
-      await apiCreateTask({
+      const data = await apiCreateTask({
         user_email: getSessionEmail(),
         task_name: text,
         due_at: dueAt,
       })
-      // אופציונלי: אפשר לקרוא ל-fetchTasksFromDB() כאן כדי לרענן את ה-ID מהשרת
+
+      const serverTask = data?.task
+      const serverId = serverTask?.id_text ?? serverTask?.id
+      if (serverId !== undefined && serverId !== null) {
+        setTasks((prev) =>
+          prev.map((t) => (t.id === tempId ? { ...t, id: String(serverId) } : t))
+        )
+      }
     } catch (err) {
       console.error('שגיאה בשמירה לשרת:', err)
+      setTaskToast(lang === 'he' ? 'נכשלה שמירת המשימה בשרת' : 'Failed to save task to server')
     }
   }
 
@@ -242,8 +265,15 @@ function App() {
   }
   
   const deleteTask = async (id) => {
+    const numericId = Number(id);
+    if (!Number.isInteger(numericId)) {
+      setTasks((prev) => prev.filter((t) => t.id !== id))
+      setTaskToast(lang === 'he' ? 'המשימה המקומית נמחקה' : 'Local task removed')
+      return
+    }
+
     try {
-      await apiDeleteTask(id)
+      await apiDeleteTask(numericId)
       setTasks((prev) => prev.filter((t) => t.id !== id))
       setTaskToast(lang === 'he' ? 'המשימה נמחקה בהצלחה' : 'Task deleted successfully')
       console.log('המשימה נמחקה בהצלחה!')
@@ -252,7 +282,7 @@ function App() {
     }
   }
   function createNoteAfter(noteId) {
-    const newNote = { id: crypto.randomUUID(), text: '' }
+    const newNote = { id: makeId(), text: '' }
     setNotes((prev) => {
       const idx = prev.findIndex((n) => n.id === noteId)
       if (idx === -1) return [newNote, ...prev]
@@ -361,7 +391,7 @@ function App() {
 // --- פונקציות מנוהלות תקינות ---
 
   async function addNote() {
-    const newNote = { id: crypto.randomUUID(), text: '' }
+    const newNote = { id: makeId(), text: '' }
     setNotes((prev) => [newNote, ...prev])
     setSelectedNoteId(newNote.id)
 
@@ -715,8 +745,7 @@ function App() {
             <div className="heroPanel" role="region" aria-label="Create tasks">
               <div className="panelHeader">
                 <h2>
-                  My tasks
-                  <span className="userName"> · {user || sessionEmail}</span>
+                  My tasks{user ? <span className="userName"> · {user}</span> : null}
                 </h2>
 
                 <div className="segmented" role="tablist" aria-label={lang === 'en' ? 'Filter tasks' : 'סינון משימות'}>

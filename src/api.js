@@ -1,15 +1,10 @@
 const API_BASE = '/api'
 
 async function request(path, options = {}) {
-  // כאן הוספנו את ה- /api בסוף הכתובת
-  const API_BASE = 'https://task-4559.onrender.com/api'; 
-  
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   })
-  
-  // ... המשך הפונקציה שלך
 
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {

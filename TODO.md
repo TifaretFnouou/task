@@ -11,4 +11,7 @@
 - [ ] Add `/api/health` endpoint with commit/version diagnostics
 - [ ] Log startup metadata (port + commit SHA)
 - [ ] Run `npm run lint` and `npm run build` after diagnostics changes
+- [ ] Fix lint config for Node globals in api files
+- [ ] Fix duplicated API_BASE usage in src/api.js
+- [ ] Re-run lint and build verification
 - [ ] Commit diagnostics/deploy fix

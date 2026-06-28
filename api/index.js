@@ -42,7 +42,7 @@ app.post('/api/register', async (req, res) => {
 app.get('/api/tasks/:email', async (req, res) => {
   const { email } = req.params;
   try {
-    const result = await pool.query('SELECT * FROM tasks WHERE user_email = $1', [email]);
+    const result = await pool.query('SELECT id, user_email, task_name, is_completed FROM tasks_data WHERE user_email = $1', [email]);
     res.json({ tasks: result.rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -52,7 +52,7 @@ app.get('/api/tasks/:email', async (req, res) => {
 app.get('/api/notes/:email', async (req, res) => {
   const { email } = req.params;
   try {
-    const result = await pool.query('SELECT * FROM notes WHERE user_email = $1', [email]);
+    const result = await pool.query('SELECT id, user_email, text, created_at FROM notes_data WHERE user_email = $1', [email]);
     res.json({ notes: result.rows });
   } catch (err) {
     res.status(500).json({ error: err.message });

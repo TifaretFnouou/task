@@ -250,16 +250,28 @@ function App() {
   }
 
   async function deleteNote(id) {
+    const prevNotes = notes
+    const prevSelected = selectedNoteId
+
+    setNotes((prev) => {
+      const next = prev.filter((n) => n.id !== id)
+      if (selectedNoteId === id) setSelectedNoteId(next[0]?.id || null)
+      return next
+    })
+
     try {
       await apiDeleteNote(id)
-
-      setNotes((prev) => {
-        const next = prev.filter((n) => n.id !== id)
-        if (selectedNoteId === id) setSelectedNoteId(next[0]?.id || null)
-        return next
-      })
       setTaskToast(lang === 'he' ? 'הפתק נמחק בהצלחה' : 'Note deleted')
     } catch (err) {
+      const msg = String(err?.message || '')
+      if (msg.includes('Note not found') || msg.includes('404') || msg.includes('Request failed')) {
+        setTaskToast(lang === 'he' ? 'הפתק כבר לא קיים בשרת' : 'Note was already removed on server')
+        return
+      }
+
+      setNotes(prevNotes)
+      setSelectedNoteId(prevSelected)
+      setTaskToast(lang === 'he' ? 'שגיאה במחיקת פתק' : 'Failed to delete note')
       console.error('שגיאה במחיקת פתק:', err)
     }
   }

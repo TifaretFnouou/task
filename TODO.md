@@ -1,5 +1,5 @@
-- [x] Update backend API endpoints in `api/index.js` for full tasks/notes CRUD
-- [x] Refactor frontend data calls in `src/App.jsx` to use local `/api` instead of hardcoded onrender URL
-- [x] Normalize tasks/notes mapping so text renders correctly
-- [x] Run critical-path checks (login, load, create/update/delete task and note)
-- [ ] Commit changes to git
+- [x] Add PWA install prompt handling in `src/App.jsx`
+- [x] Render install button on home screen when `beforeinstallprompt` is available
+- [x] Add matching install button styles in `src/App.css`
+- [ ] Run critical validation for app startup and install button behavior
+- [ ] Update checklist status and finalize

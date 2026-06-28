@@ -192,6 +192,23 @@
   max-width: 420px;
 }
 
+.installBtn {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 90, 214, 0.55);
+  background: linear-gradient(180deg, rgba(255, 90, 214, 0.95), rgba(255, 90, 214, 0.65));
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.installBtn:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.05) contrast(1.02);
+}
+
 .segmented {
   display: flex;
   gap: 8px;

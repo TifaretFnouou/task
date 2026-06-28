@@ -131,6 +131,7 @@ function App() {
   const [authSuccess, setAuthSuccess] = useState('')
   const [view, setView] = useState('tasks') // tasks | notes | profile
   const [taskToast, setTaskToast] = useState('')
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
 
   //useEffect(() => {
    // if (!user) return
@@ -457,6 +458,27 @@ function App() {
     return () => window.clearTimeout(timer)
   }, [taskToast])
 
+  useEffect(() => {
+    function onBeforeInstallPrompt(e) {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+  }, [])
+
+  async function handleInstallApp() {
+    if (!deferredPrompt) return
+    deferredPrompt.prompt()
+    try {
+      await deferredPrompt.userChoice
+    } catch {
+      // ignore choice errors
+    }
+    setDeferredPrompt(null)
+  }
+
   const activeCount = tasks.filter((t) => !t.done).length
   const doneCount = tasks.filter((t) => t.done).length
   const selectedNote = notes.find((n) => n.id === selectedNoteId) || null
@@ -749,6 +771,12 @@ function App() {
               <div className="heroStats">
                 <StatsPanel tasks={tasks} lang={lang} />
               </div>
+
+              {deferredPrompt ? (
+                <button type="button" className="installBtn" onClick={handleInstallApp}>
+                  {lang === 'en' ? 'Install app' : 'התקן את האפליקציה'}
+                </button>
+              ) : null}
             </div>
 
             <div className="heroPanel" role="region" aria-label="Create tasks">

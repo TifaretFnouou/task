@@ -957,6 +957,12 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 6px 8px;
+  width: 100%;
+}
+
+.authForm .field,
+.authForm .field > div {
+  width: 100%;
 }
 
 .field {
@@ -975,6 +981,9 @@
 
 .authInput {
   width: 100%;
+  min-width: 100%;
+  display: block;
+  box-sizing: border-box;
   border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.7);
@@ -1026,6 +1035,8 @@
 
 .authSubmit {
   width: 100%;
+  display: block;
+  box-sizing: border-box;
 }
 
 .hero {

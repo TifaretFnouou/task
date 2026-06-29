@@ -1,16 +1,5 @@
-- [x] Move language/theme controls to top header actions
-- [x] Keep Hebrew/English toggle behavior intact
-- [x] Update App.css layout styles for top placement
-- [x] Build and verify (`npm run build`)
-- [x] Commit and push to git
-- [x] Improve top menu button visual style (language/theme group)
-- [x] Build and verify (`npm run build`) after style update
-- [x] Commit and push to git (style polish)
-- [x] Revert language/theme controls to previous floating position
-- [x] Move install button to top header menu row
-- [x] Clean CSS from menuControls/menuPill/menuDivider styles
-- [x] Build and verify (`npm run build`) after revert
-- [x] Commit and push to git (revert + install button top)
-- [ ] Polish install button style in top menu (aligned + professional)
-- [ ] Build and verify (`npm run build`) after install button polish
-- [ ] Commit and push to git (install button polish)
+- [x] Add profile name edit support in src/App.jsx
+- [x] Wire apiUpdateUserName call and optimistic UI update
+- [x] Add profile UI controls (Edit / Save / Cancel) for name
+- [x] Run lint and validate no errors
+- [ ] Verify API update-name flow and summarize results

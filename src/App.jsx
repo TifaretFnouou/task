@@ -16,6 +16,7 @@ import {
   apiCreateNote,
   apiUpdateNote,
   apiDeleteNote,
+  apiUpdateUserName,
 } from './api'
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase()
@@ -132,6 +133,8 @@ function App() {
   const [view, setView] = useState('tasks') // tasks | notes | profile
   const [taskToast, setTaskToast] = useState('')
   const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [nameDraft, setNameDraft] = useState('')
 
   //useEffect(() => {
    // if (!user) return
@@ -429,6 +432,30 @@ function App() {
       console.error('שגיאה בעדכון פתק בשרת:', err)
     }
   }
+  async function saveProfileName() {
+    const currentEmail = getSessionEmail()
+    const trimmed = String(nameDraft || '').trim()
+
+    if (!currentEmail) return
+    if (!trimmed) {
+      setTaskToast(lang === 'he' ? 'נא להזין שם תקין' : 'Please enter a valid name')
+      return
+    }
+
+    const prevName = user
+    setUser(trimmed)
+    setIsEditingName(false)
+
+    try {
+      await apiUpdateUserName({ email: currentEmail, name: trimmed })
+      setTaskToast(lang === 'he' ? 'השם עודכן בהצלחה' : 'Name updated successfully')
+    } catch (err) {
+      console.error('שגיאה בעדכון שם משתמש:', err)
+      setUser(prevName)
+      setTaskToast(lang === 'he' ? 'נכשלה שמירת השם' : 'Failed to update name')
+    }
+  }
+
   async function forgotPassword() {
     setAuthError('')
     setAuthSuccess('')
@@ -998,7 +1025,46 @@ function App() {
                 <div className="profileRows">
                   <div className="profileRow">
                     <span>{lang === 'en' ? 'Name' : 'שם'}</span>
-                    <strong>{user || '-'}</strong>
+                    {isEditingName ? (
+                      <div className="profileNameEdit">
+                        <input
+                          className="authInput profileNameInput"
+                          value={nameDraft}
+                          onChange={(e) => setNameDraft(e.target.value)}
+                          placeholder={lang === 'en' ? 'Enter name' : 'הזינו שם'}
+                        />
+                        <div className="profileNameActions">
+                          <button type="button" className="primaryBtn" onClick={saveProfileName}>
+                            {lang === 'en' ? 'Save' : 'שמור'}
+                          </button>
+                          <button
+                            type="button"
+                            className="ghostBtn"
+                            onClick={() => {
+                              setIsEditingName(false)
+                              setNameDraft(user || '')
+                            }}
+                          >
+                            {lang === 'en' ? 'Cancel' : 'ביטול'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="profileNameDisplay">
+                        <strong>{user || '-'}</strong>
+                        <button
+                          type="button"
+                          className="ghostBtn"
+                          onClick={() => {
+                            setNameDraft(user || '')
+                            setIsEditingName(true)
+                          }}
+                        >
+                          <span className="editPencilIcon" aria-hidden="true">✏️</span>
+                          <span>{lang === 'en' ? 'Edit' : 'ערוך'}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="profileRow">
                     <span>{lang === 'en' ? 'Email' : 'אימייל'}</span>

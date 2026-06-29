@@ -110,3 +110,20 @@ export async function apiDeleteNote(id) {
     throw err
   }
 }
+
+export async function apiUpdateUserName(payload) {
+  try {
+    return await request('/users/name', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    })
+  } catch (err) {
+    if (String(err?.message || '').includes('Request failed')) {
+      return request('/users', {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      })
+    }
+    throw err
+  }
+}

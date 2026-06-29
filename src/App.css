@@ -1596,6 +1596,67 @@
   background: rgba(255, 90, 214, 0.13);
 }
 
+.profileNameDisplay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profileNameEdit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profileNameInput {
+  min-width: 180px;
+  max-width: 240px;
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+.profileNameActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profileNameActions .primaryBtn,
+.profileNameActions .ghostBtn,
+.profileNameDisplay .ghostBtn {
+  min-height: 32px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.profileNameActions .primaryBtn {
+  border-color: rgba(255, 90, 214, 0.5);
+  box-shadow: 0 6px 14px rgba(255, 90, 214, 0.18);
+}
+
+.profileNameDisplay .ghostBtn,
+.profileNameActions .ghostBtn {
+  background: rgba(255, 90, 214, 0.06);
+  border-color: rgba(255, 90, 214, 0.32);
+}
+
+.profileNameDisplay .ghostBtn:hover,
+.profileNameActions .ghostBtn:hover {
+  background: rgba(255, 90, 214, 0.12);
+  border-color: rgba(255, 90, 214, 0.55);
+}
+
+.editPencilIcon {
+  font-size: 12px;
+  line-height: 1;
+}
+
 @media (prefers-color-scheme: dark) {
   .profileHeader {
     background:

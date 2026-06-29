@@ -346,7 +346,7 @@ function App() {
     try {
       const data = await apiRegister({ email, name, password })
       setSessionEmail(email)
-      setUser(data.user?.name || name)
+      setUser(data.user?.user_name || data.user?.name || name)
       setTasks([])
       setNotes([])
     } catch (err) {
@@ -368,7 +368,7 @@ function App() {
 
       const data = await apiLogin({ email, password })
       setSessionEmail(email)
-      setUser(data.user?.name || data.user?.user_email || email)
+      setUser(data.user?.user_name || data.user?.name || data.user?.user_email || email)
       setTasks([])
       setNotes(loadUserNotes(email))
       setView('tasks')

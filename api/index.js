@@ -29,10 +29,52 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
   try {
-    const result = await pool.query('INSERT INTO users_data (user_email, user_password) VALUES ($1, $2) RETURNING *', [email, password]);
-    res.status(201).json(result.rows[0]);
+    const result = await pool.query(
+      'INSERT INTO users_data (user_email, user_password, user_name) VALUES ($1, $2, $3) RETURNING *',
+      [email, password, name || null]
+    );
+    res.status(201).json({ user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/users/name', async (req, res) => {
+  const { email, name } = req.body;
+  const trimmedName = String(name || '').trim();
+  if (!email || !trimmedName) {
+    return res.status(400).json({ error: 'email and name are required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'UPDATE users_data SET user_name = $1 WHERE user_email = $2 RETURNING *',
+      [trimmedName, email]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/users', async (req, res) => {
+  const { email, name } = req.body;
+  const trimmedName = String(name || '').trim();
+  if (!email || !trimmedName) {
+    return res.status(400).json({ error: 'email and name are required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'UPDATE users_data SET user_name = $1 WHERE user_email = $2 RETURNING *',
+      [trimmedName, email]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json({ user: result.rows[0] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

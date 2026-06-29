@@ -15,6 +15,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve public assets in production (manifest/icons)
+const publicPath = path.join(process.cwd(), 'public');
+app.use(express.static(publicPath));
+
 // --- API Endpoints (PostgreSQL) ---
 
 app.post('/api/login', async (req, res) => {

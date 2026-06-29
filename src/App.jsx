@@ -538,6 +538,20 @@ function App() {
   const sessionEmail = getSessionEmail() || ''
   const userInitial = (user || sessionEmail || '?').trim().charAt(0).toUpperCase() || '?'
 
+  const ResumeFooterLink = () => (
+    <footer className="footer">
+      <span>@tifaret 2026 -</span>
+      <a
+        href="/resume.html"
+        className="resume-btn"
+        aria-label="View My Resume"
+        title="View My Resume"
+      >
+        View My Resume
+      </a>
+    </footer>
+  )
+
   if (!user) {
     return (
       <div className="page">
@@ -708,19 +722,7 @@ function App() {
           </section>
         </main>
 
-        <footer className="footer">
-          <span>@tifaret 2026 -</span>
-          <a
-            href="https://drive.google.com/file/d/1nkHSB4BHNLffNERGIiypv-eaLLHDqyAW/view?usp=drive_link"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="resume-btn"
-            aria-label="View My Resume"
-            title="View My Resume"
-          >
-            View My Resume
-          </a>
-        </footer>
+        <ResumeFooterLink />
       </div>
     )
   }
@@ -1092,6 +1094,8 @@ function App() {
           </section>
         )}
       </main>
+
+      <ResumeFooterLink />
     </div>
   )
 }

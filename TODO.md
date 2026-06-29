@@ -1,5 +1,4 @@
-- [x] Add profile name edit support in src/App.jsx
-- [x] Wire apiUpdateUserName call and optimistic UI update
-- [x] Add profile UI controls (Edit / Save / Cancel) for name
-- [x] Run lint and validate no errors
-- [ ] Verify API update-name flow and summarize results
+- [x] Create new page: public/resume.html
+- [x] Update resume link in src/App.jsx to /resume.html
+- [x] Add resume link footer to all app views (login/tasks/notes/profile)
+- [ ] Verify navigation flow (main page -> resume page -> drive link)

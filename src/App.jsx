@@ -755,17 +755,6 @@ function App() {
             {lang === 'en' ? 'Notes' : 'הערות'}
           </button>
 
-          <button type="button" className="ghostBtn" onClick={logout}>
-            {t.logout}
-          </button>
-
-          <button
-            type="button"
-            className="installBtn"
-            onClick={handleInstallApp}
-          >
-            {lang === 'en' ? 'Install app' : 'התקן אפליקציה'}
-          </button>
 
           <button
             type="button"
@@ -1086,6 +1075,19 @@ function App() {
                   </div>
                 </div>
               </article>
+            </div>
+
+            <div className="profileBottomActions">
+              <button type="button" className="ghostBtn" onClick={logout}>
+                {t.logout}
+              </button>
+              <button
+                type="button"
+                className="installBtn"
+                onClick={handleInstallApp}
+              >
+                {lang === 'en' ? 'Install app' : 'התקן אפליקציה'}
+              </button>
             </div>
           </section>
         )}

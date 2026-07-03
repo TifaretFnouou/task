@@ -727,7 +727,24 @@ function App() {
     )
   }
   if (isLoading) {
-    return <div className="loading-screen">טוען נתונים...</div>;
+    return (
+      <div className="loading-screen" role="status" aria-live="polite">
+        <div className="loading-card">
+          <img className="loading-logo" src="/logo.png" alt="TaskEase logo" />
+          <button type="button" className="spinner-btn" aria-label={lang === 'en' ? 'Loading' : 'טוען'}>
+            <span className="spinner-ring" aria-hidden="true" />
+            <span className="spinner-dot" aria-hidden="true" />
+          </button>
+          <h2 className="loading-title">{lang === 'en' ? 'Site is loading...' : 'האתר נטען...'}</h2>
+          <p className="loading-subtitle">
+            {lang === 'en' ? 'Just a moment, preparing your workspace.' : 'רק עוד רגע, מכינים לך את סביבת העבודה.'}
+          </p>
+          <a className="loading-resume-link" href="/resume.html">
+            {lang === 'en' ? 'View My Resume' : 'למעבר לעמוד קורות חיים'}
+          </a>
+        </div>
+      </div>
+    );
   }
   return (
     <div className="page">

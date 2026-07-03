@@ -65,6 +65,36 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
+app.post('/api/forgot-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedPassword = String(newPassword || '');
+
+  if (!normalizedEmail || !normalizedPassword) {
+    return res.status(400).json({ error: 'email and newPassword are required' });
+  }
+
+  try {
+    const existing = await pool.query(
+      'SELECT user_email FROM users_data WHERE user_email::text ILIKE $1 LIMIT 1',
+      [normalizedEmail]
+    );
+
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await pool.query(
+      'UPDATE users_data SET user_password = $1 WHERE user_email::text ILIKE $2',
+      [normalizedPassword, normalizedEmail]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put('/api/users/name', async (req, res) => {
   const { email, name } = req.body;
   const trimmedName = String(name || '').trim();

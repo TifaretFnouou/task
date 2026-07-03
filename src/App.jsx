@@ -505,12 +505,12 @@ function App() {
     if (passwordError) return setAuthError(passwordError)
 
     try {
-      const data = await apiForgotPassword({ email, newPassword })
+      await apiForgotPassword({ email, newPassword })
       setResetPassword('')
       setAuthPassword('')
       setAuthName('')
       setAuthMode('login')
-      setAuthSuccess(data.message || 'Password updated successfully. Please login.')
+      setAuthSuccess(lang === 'he' ? 'הסיסמה עודכנה בהצלחה. אפשר להתחבר עכשיו.' : 'Password updated successfully. Please login.')
     } catch (err) {
       setAuthError(err.message || 'Failed to update password.')
     }
@@ -682,7 +682,7 @@ function App() {
                   placeholder="you@example.com"
                   onChange={(e) => setAuthEmail(e.target.value)}
                   type="email"
-                  autoComplete="email"
+                  autoComplete={authMode === 'login' ? 'username' : 'email'}
                 />
               </label>
 

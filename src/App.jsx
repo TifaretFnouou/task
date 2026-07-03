@@ -22,6 +22,26 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase()
 }
 
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim())
+}
+
+function validateName(name, lang) {
+  const trimmed = String(name || '').trim()
+  if (!trimmed) return lang === 'he' ? 'נא להזין שם משתמש.' : 'Please enter a username.'
+  if (trimmed.length < 2) return lang === 'he' ? 'שם משתמש חייב להכיל לפחות 2 תווים.' : 'Username must be at least 2 characters.'
+  return ''
+}
+
+function validatePassword(password, lang) {
+  const value = String(password || '')
+  if (!value) return lang === 'he' ? 'נא להזין סיסמה.' : 'Please enter a password.'
+  if (value.length < 8) return lang === 'he' ? 'הסיסמה חייבת להכיל לפחות 8 תווים.' : 'Password must be at least 8 characters.'
+  if (!/[A-Z]/.test(value)) return lang === 'he' ? 'הסיסמה חייבת להכיל לפחות אות גדולה אחת באנגלית (A-Z).' : 'Password must include at least one uppercase letter (A-Z).'
+  if (!/[0-9]/.test(value)) return lang === 'he' ? 'הסיסמה חייבת להכיל לפחות ספרה אחת (0-9).' : 'Password must include at least one digit (0-9).'
+  return ''
+}
+
 function makeId() {
   if (typeof globalThis !== 'undefined' && globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID()
@@ -338,10 +358,19 @@ function App() {
     const name = String(authName || '').trim()
     const password = String(authPassword || '')
 
-    if (!email) return setAuthError('Please enter email.')
-    if (!name) return setAuthError('Please enter name.')
-    if (!password || password.length < 4)
-      return setAuthError('Password must be at least 4 characters.')
+    if (!email) return setAuthError(lang === 'he' ? 'נא להזין אימייל.' : 'Please enter email.')
+    if (!isValidEmail(email)) return setAuthError(lang === 'he' ? 'פורמט האימייל אינו תקין.' : 'Invalid email format.')
+
+    const nameError = validateName(name, lang)
+    if (nameError) return setAuthError(nameError)
+
+    const passwordError = validatePassword(password, lang)
+    if (passwordError) return setAuthError(passwordError)
+
+    const existingUser = getUserByEmail(email)
+    if (existingUser) {
+      return setAuthError(lang === 'he' ? 'כבר קיים משתמש עם המייל הזה' : 'An account with this email already exists')
+    }
 
     try {
       const data = await apiRegister({ email, name, password })
@@ -350,7 +379,12 @@ function App() {
       setTasks([])
       setNotes([])
     } catch (err) {
-      setAuthError(err.message || 'Failed to register user.')
+      const message = String(err?.message || '')
+      if (message.toLowerCase().includes('already') || message.toLowerCase().includes('exists') || message.toLowerCase().includes('duplicate')) {
+        setAuthError(lang === 'he' ? 'כבר קיים משתמש עם המייל הזה' : 'An account with this email already exists')
+        return
+      }
+      setAuthError(err.message || (lang === 'he' ? 'נכשלה יצירת משתמש' : 'Failed to register user'))
     }
   }
 
@@ -361,8 +395,9 @@ function App() {
     const email = normalizeEmail(authEmail);
     const password = String(authPassword || '');
 
-    if (!email) return setAuthError('Please enter email.');
-    if (!password) return setAuthError('Please enter password.');
+    if (!email) return setAuthError(lang === 'he' ? 'נא להזין אימייל' : 'Please enter email');
+    if (!isValidEmail(email)) return setAuthError(lang === 'he' ? 'פורמט האימייל אינו תקין' : 'Invalid email format');
+    if (!password) return setAuthError(lang === 'he' ? 'נא להזין סיסמה' : 'Please enter password.');
 
     try {
 
@@ -401,7 +436,7 @@ function App() {
       setSelectedNoteId(normalizedNotes[0]?.id || null)
       setView('tasks')
     } catch (err) {
-      setAuthError(err.message || 'Invalid email or password.');
+      setAuthError(err.message || 'Invalid email or password');
     }
   }
 // --- פונקציות מנוהלות תקינות ---
@@ -463,9 +498,11 @@ function App() {
     const email = normalizeEmail(authEmail)
     const newPassword = String(resetPassword || '')
 
-    if (!email) return setAuthError('Please enter email.')
-    if (!newPassword || newPassword.length < 4)
-      return setAuthError('Password must be at least 4 characters.')
+    if (!email) return setAuthError(lang === 'he' ? 'נא להזין אימייל' : 'Please enter email')
+    if (!isValidEmail(email)) return setAuthError(lang === 'he' ? 'פורמט האימייל אינו תקין' : 'Invalid email format')
+
+    const passwordError = validatePassword(newPassword, lang)
+    if (passwordError) return setAuthError(passwordError)
 
     try {
       const data = await apiForgotPassword({ email, newPassword })
@@ -565,6 +602,30 @@ function App() {
           </div>
           <div className="topActions" />
         </header>
+
+        <div className="floatingControls" aria-label={lang === 'en' ? 'Display controls' : 'בקרות תצוגה'}>
+          <button
+            type="button"
+            className="controlPill"
+            onClick={() => setLang((p) => (p === 'he' ? 'en' : 'he'))}
+            aria-label="Toggle language"
+            title={lang === 'en' ? 'Switch language' : 'החלפת שפה'}
+          >
+            <span className="controlIcon" aria-hidden="true">A</span>
+            <span>{lang === 'he' ? 'EN' : 'עברית'}</span>
+          </button>
+
+          <button
+            type="button"
+            className="controlPill"
+            onClick={() => setTheme((p) => (p === 'dark' ? 'light' : 'dark'))}
+            aria-label="Toggle brightness"
+            title={lang === 'en' ? 'Switch theme' : 'החלפת ערכת נושא'}
+          >
+            <span className="controlIcon" aria-hidden="true">{theme === 'dark' ? '◑' : '◐'}</span>
+            <span>{theme === 'dark' ? 'כהה' : 'בהיר'}</span>
+          </button>
+        </div>
 
         <main className="main">
           <section className="authCard" aria-label="Authentication">

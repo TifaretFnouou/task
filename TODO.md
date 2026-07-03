@@ -2,3 +2,5 @@
 - [x] Update resume link in src/App.jsx to /resume.html
 - [x] Add resume link footer to all app views (login/tasks/notes/profile)
 - [ ] Verify navigation flow (main page -> resume page -> drive link)
+- [x] Add floating language/theme controls to login/register screen
+- [x] Mark task complete after updating App.jsx

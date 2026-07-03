@@ -34,14 +34,33 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/register', async (req, res) => {
   const { email, password, name } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  if (!normalizedEmail || !password) {
+    return res.status(400).json({ error: 'email and password are required' });
+  }
+
   try {
+    const existing = await pool.query(
+      'SELECT user_email FROM users_data WHERE user_email::text ILIKE $1 LIMIT 1',
+      [normalizedEmail]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'User with this email already exists' });
+    }
+
     const result = await pool.query(
       'INSERT INTO users_data (user_email, user_password, user_name) VALUES ($1, $2, $3) RETURNING *',
-      [email, password, name || null]
+      [normalizedEmail, password, name || null]
     );
+
     res.status(201).json({ user: result.rows[0] });
   } catch (err) {
+    const msg = String(err?.message || '').toLowerCase();
+    if (msg.includes('duplicate') || msg.includes('unique')) {
+      return res.status(409).json({ error: 'User with this email already exists' });
+    }
     res.status(500).json({ error: err.message });
   }
 });

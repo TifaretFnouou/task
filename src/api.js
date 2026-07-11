@@ -30,6 +30,13 @@ export function apiLogin(payload) {
   })
 }
 
+export function apiGetForgotPasswordQuestion(payload) {
+  return request('/forgot-password/question', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function apiForgotPassword(payload) {
   return request('/forgot-password', {
     method: 'POST',

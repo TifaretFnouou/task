@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import pg from 'pg';
 import path from 'path';
+import crypto from 'crypto';
 
 const { Pool } = pg;
 
@@ -21,6 +22,25 @@ app.use(express.static(publicPath));
 
 // --- API Endpoints (PostgreSQL) ---
 
+const SECURITY_QUESTIONS = {
+  motherMaiden: "What is your mother's maiden name?",
+  motherBirthCity: 'In which city was your mother born?',
+  favoriteMovie: 'What is your favorite movie?',
+  firstTeacher: 'What was the first name of your first teacher?',
+  childhoodFriend: 'What is the first name of your childhood best friend?',
+  firstPhone: 'What was the last 4 digits of your first phone number?',
+  favoriteBook: 'What is your favorite book?',
+  firstJobCity: 'In which city did you have your first job?',
+};
+
+function normalizeAnswer(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function hashAnswer(value) {
+  return crypto.createHash('sha256').update(normalizeAnswer(value)).digest('hex');
+}
+
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -33,11 +53,25 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, securityQuestionKey, securityAnswer } = req.body;
   const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedQuestionKey = String(securityQuestionKey || '').trim();
+  const normalizedSecurityAnswer = String(securityAnswer || '').trim();
+
+  console.log('[register] body keys:', Object.keys(req.body || {}));
+  console.log('[register] securityQuestionKey:', normalizedQuestionKey);
+  console.log('[register] securityAnswer length:', normalizedSecurityAnswer.length);
 
   if (!normalizedEmail || !password) {
     return res.status(400).json({ error: 'email and password are required' });
+  }
+
+  if (!normalizedQuestionKey || !SECURITY_QUESTIONS[normalizedQuestionKey]) {
+    return res.status(400).json({ error: 'Valid security question is required' });
+  }
+
+  if (!normalizedSecurityAnswer) {
+    return res.status(400).json({ error: 'securityAnswer is required' });
   }
 
   try {
@@ -50,10 +84,24 @@ app.post('/api/register', async (req, res) => {
       return res.status(409).json({ error: 'User with this email already exists' });
     }
 
+    const insertValues = [normalizedEmail, password, name || null, normalizedQuestionKey, hashAnswer(normalizedSecurityAnswer)];
+    console.log('[register] insertValues meta:', {
+      email: insertValues[0],
+      hasPassword: Boolean(insertValues[1]),
+      name: insertValues[2],
+      questionKey: insertValues[3],
+      answerHashPrefix: String(insertValues[4]).slice(0, 8),
+    });
+
     const result = await pool.query(
-      'INSERT INTO users_data (user_email, user_password, user_name) VALUES ($1, $2, $3) RETURNING *',
-      [normalizedEmail, password, name || null]
+      'INSERT INTO users_data (user_email, user_password, user_name, security_question_key, security_answer) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      insertValues
     );
+
+    console.log('[register] inserted security fields:', {
+      security_question_key: result.rows?.[0]?.security_question_key,
+      security_answer_present: Boolean(result.rows?.[0]?.security_answer),
+    });
 
     res.status(201).json({ user: result.rows[0] });
   } catch (err) {
@@ -65,18 +113,48 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
+app.post('/api/forgot-password/question', async (req, res) => {
+  const { email } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  if (!normalizedEmail) {
+    return res.status(400).json({ error: 'email is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT security_question_key FROM users_data WHERE user_email::text ILIKE $1 LIMIT 1',
+      [normalizedEmail]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const questionKey = result.rows[0].security_question_key;
+    if (!questionKey || !SECURITY_QUESTIONS[questionKey]) {
+      return res.status(400).json({ error: 'Security question is not configured for this user' });
+    }
+
+    return res.json({ questionKey, questionText: SECURITY_QUESTIONS[questionKey] });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/forgot-password', async (req, res) => {
-  const { email, newPassword } = req.body;
+  const { email, newPassword, securityAnswer } = req.body;
   const normalizedEmail = String(email || '').trim().toLowerCase();
   const normalizedPassword = String(newPassword || '');
+  const normalizedSecurityAnswer = String(securityAnswer || '').trim();
 
-  if (!normalizedEmail || !normalizedPassword) {
-    return res.status(400).json({ error: 'email and newPassword are required' });
+  if (!normalizedEmail || !normalizedPassword || !normalizedSecurityAnswer) {
+    return res.status(400).json({ error: 'email, securityAnswer and newPassword are required' });
   }
 
   try {
     const existing = await pool.query(
-      'SELECT user_email FROM users_data WHERE user_email::text ILIKE $1 LIMIT 1',
+      'SELECT user_email, security_answer FROM users_data WHERE user_email::text ILIKE $1 LIMIT 1',
       [normalizedEmail]
     );
 
@@ -84,9 +162,20 @@ app.post('/api/forgot-password', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    const savedAnswer = String(existing.rows[0].security_answer || '');
+    const isLegacyPlain = savedAnswer && !/^[a-f0-9]{64}$/i.test(savedAnswer);
+    const incomingHash = hashAnswer(normalizedSecurityAnswer);
+    const isAnswerValid = isLegacyPlain
+      ? normalizeAnswer(savedAnswer) === normalizeAnswer(normalizedSecurityAnswer)
+      : savedAnswer === incomingHash;
+
+    if (!isAnswerValid) {
+      return res.status(401).json({ error: 'Invalid security answer' });
+    }
+
     await pool.query(
-      'UPDATE users_data SET user_password = $1 WHERE user_email::text ILIKE $2',
-      [normalizedPassword, normalizedEmail]
+      'UPDATE users_data SET user_password = $1, security_answer = $2 WHERE user_email::text ILIKE $3',
+      [normalizedPassword, incomingHash, normalizedEmail]
     );
 
     res.json({ success: true });

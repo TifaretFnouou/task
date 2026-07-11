@@ -8,6 +8,7 @@ import {
   apiRegister,
   apiLogin,
   apiForgotPassword,
+  apiGetForgotPasswordQuestion,
   apiUpdateTask,
   apiGetTasks,
   apiCreateTask,
@@ -47,6 +48,59 @@ function makeId() {
     return globalThis.crypto.randomUUID()
   }
   return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function mapAuthError(message, lang) {
+  const msg = String(message || '').toLowerCase()
+
+  if (msg.includes('already') || msg.includes('exists') || msg.includes('duplicate')) {
+    return lang === 'he' ? 'כבר קיים משתמש עם המייל הזה' : 'An account with this email already exists'
+  }
+
+  if (msg.includes('invalid credentials') || msg.includes('invalid email or password')) {
+    return lang === 'he' ? 'אימייל או סיסמה שגויים' : 'Invalid email or password'
+  }
+
+  if (msg.includes('user not found') || msg.includes('no user') || msg.includes('not found')) {
+    return lang === 'he' ? 'המשתמש לא נמצא' : 'User not found'
+  }
+
+  if (
+    msg.includes('invalid security answer') ||
+    msg.includes('wrong security answer') ||
+    msg.includes('security answer is invalid') ||
+    msg.includes('answer mismatch')
+  ) {
+    return lang === 'he' ? 'תשובת האבטחה שגויה' : 'Invalid security answer'
+  }
+
+  if (msg.includes('securityquestionkey') || msg.includes('security question')) {
+    return lang === 'he' ? 'שאלת האבטחה שנבחרה אינה תקינה' : 'Selected security question is invalid'
+  }
+
+  if (msg.includes('securityanswer') || msg.includes('security answer')) {
+    return lang === 'he' ? 'נא להזין תשובת אבטחה תקינה' : 'Please enter a valid security answer'
+  }
+
+  if (msg.includes('email and password are required')) {
+    return lang === 'he' ? 'אימייל וסיסמה הם שדות חובה' : 'Email and password are required'
+  }
+
+  if (msg.includes('email and newpassword are required') || msg.includes('new password')) {
+    return lang === 'he' ? 'אימייל וסיסמה חדשה הם שדות חובה' : 'Email and new password are required'
+  }
+
+  if (msg.includes('failed to update password')) {
+    return lang === 'he' ? 'נכשל עדכון הסיסמה' : 'Failed to update password'
+  }
+
+  if (msg.includes('request failed') || msg.includes('network') || msg.includes('fetch')) {
+    return lang === 'he' ? 'הבקשה נכשלה, נסה שוב' : 'Request failed, please try again'
+  }
+
+  return lang === 'he'
+    ? `שגיאת אימות: ${message || 'אירעה שגיאה, נסה שוב'}`
+    : (message || 'Something went wrong, please try again')
 }
 
 function App() {
@@ -148,6 +202,9 @@ function App() {
   const [authName, setAuthName] = useState('')
   const [authPassword, setAuthPassword] = useState('')
   const [resetPassword, setResetPassword] = useState('')
+  const [securityQuestionKey, setSecurityQuestionKey] = useState('motherMaiden')
+  const [securityAnswer, setSecurityAnswer] = useState('')
+  const [forgotQuestionText, setForgotQuestionText] = useState('')
   const [authError, setAuthError] = useState('')
   const [authSuccess, setAuthSuccess] = useState('')
   const [view, setView] = useState('tasks') // tasks | notes | profile
@@ -183,6 +240,7 @@ function App() {
               id: task.id_text || task.id,
               done: Boolean(task.is_completed),
               dueAt: task.due_at || null,
+              createdAt: task.created_at || new Date().toISOString(),
             })),
           )
         }
@@ -203,8 +261,12 @@ function App() {
   }, [user, isLoading])
 
   const filtered = useMemo(() => {
-    if (filter === 'done') return tasks.filter((t) => t.done)
-    return tasks.filter((t) => !t.done)
+    const base = filter === 'done' ? tasks.filter((t) => t.done) : tasks.filter((t) => !t.done)
+    return [...base].sort((a, b) => {
+      const aTime = new Date(a.createdAt || 0).getTime()
+      const bTime = new Date(b.createdAt || 0).getTime()
+      return bTime - aTime
+    })
   }, [filter, tasks])
   
   async function toggleTask(id) {
@@ -246,7 +308,7 @@ function App() {
 
     const dueAt = timeText ? timeText : null;
     const tempId = makeId();
-    const newTask = { id: tempId, text, done: false, dueAt };
+    const newTask = { id: tempId, text, done: false, dueAt, createdAt: new Date().toISOString() };
 
     // עדכון הממשק
     setTasks((prev) => [...prev, newTask]);
@@ -357,6 +419,7 @@ function App() {
     const email = normalizeEmail(authEmail)
     const name = String(authName || '').trim()
     const password = String(authPassword || '')
+    const normalizedSecurityAnswer = String(securityAnswer || '').trim()
 
     if (!email) return setAuthError(lang === 'he' ? 'נא להזין אימייל.' : 'Please enter email.')
     if (!isValidEmail(email)) return setAuthError(lang === 'he' ? 'פורמט האימייל אינו תקין.' : 'Invalid email format.')
@@ -366,6 +429,9 @@ function App() {
 
     const passwordError = validatePassword(password, lang)
     if (passwordError) return setAuthError(passwordError)
+    if (!normalizedSecurityAnswer) {
+      return setAuthError(lang === 'he' ? 'נא להזין תשובת אבטחה.' : 'Please enter a security answer.')
+    }
 
     const existingUser = getUserByEmail(email)
     if (existingUser) {
@@ -373,7 +439,13 @@ function App() {
     }
 
     try {
-      const data = await apiRegister({ email, name, password })
+      const data = await apiRegister({
+        email,
+        name,
+        password,
+        securityQuestionKey,
+        securityAnswer: normalizedSecurityAnswer,
+      })
       setSessionEmail(email)
       setUser(data.user?.user_name || data.user?.name || name)
       setTasks([])
@@ -384,7 +456,7 @@ function App() {
         setAuthError(lang === 'he' ? 'כבר קיים משתמש עם המייל הזה' : 'An account with this email already exists')
         return
       }
-      setAuthError(err.message || (lang === 'he' ? 'נכשלה יצירת משתמש' : 'Failed to register user'))
+      setAuthError(mapAuthError(err?.message, lang))
     }
   }
 
@@ -421,6 +493,7 @@ function App() {
             text: task.task_name ?? task.text ?? '',
             done: Boolean(task.is_completed ?? task.done),
             dueAt: task.due_at || null,
+            createdAt: task.created_at || new Date().toISOString(),
           }))
         : []
 
@@ -436,7 +509,7 @@ function App() {
       setSelectedNoteId(normalizedNotes[0]?.id || null)
       setView('tasks')
     } catch (err) {
-      setAuthError(err.message || 'Invalid email or password');
+      setAuthError(mapAuthError(err?.message, lang))
     }
   }
 // --- פונקציות מנוהלות תקינות ---
@@ -491,6 +564,25 @@ function App() {
     }
   }
 
+  async function loadForgotPasswordQuestion() {
+    setAuthError('')
+    setAuthSuccess('')
+
+    const email = normalizeEmail(authEmail)
+    if (!email) return setAuthError(lang === 'he' ? 'נא להזין אימייל' : 'Please enter email')
+    if (!isValidEmail(email)) return setAuthError(lang === 'he' ? 'פורמט האימייל אינו תקין' : 'Invalid email format')
+
+    try {
+      const data = await apiGetForgotPasswordQuestion({ email })
+      setForgotQuestionText(data?.questionText || '')
+      setSecurityQuestionKey(data?.questionKey || '')
+      setAuthSuccess(lang === 'he' ? 'שאלת האבטחה נטענה. הזן תשובה וסיסמה חדשה.' : 'Security question loaded. Enter answer and new password.')
+    } catch (err) {
+      setForgotQuestionText('')
+      setAuthError(mapAuthError(err?.message, lang))
+    }
+  }
+
   async function forgotPassword() {
     setAuthError('')
     setAuthSuccess('')
@@ -505,14 +597,19 @@ function App() {
     if (passwordError) return setAuthError(passwordError)
 
     try {
-      await apiForgotPassword({ email, newPassword })
+      await apiForgotPassword({ email, newPassword, securityAnswer })
       setResetPassword('')
       setAuthPassword('')
       setAuthName('')
       setAuthMode('login')
       setAuthSuccess(lang === 'he' ? 'הסיסמה עודכנה בהצלחה. אפשר להתחבר עכשיו.' : 'Password updated successfully. Please login.')
     } catch (err) {
-      setAuthError(err.message || 'Failed to update password.')
+      const raw = String(err?.message || '')
+      if (raw.toLowerCase().includes('invalid security answer')) {
+        setAuthError(lang === 'he' ? 'תשובת האבטחה שגויה' : 'Invalid security answer')
+      } else {
+        setAuthError(mapAuthError(raw, lang))
+      }
     }
   }
 
@@ -647,6 +744,7 @@ function App() {
                     setAuthMode('login')
                     setAuthError('')
                     setAuthSuccess('')
+                    setForgotQuestionText('')
                   }}
                 >
                   {t.login}
@@ -658,6 +756,7 @@ function App() {
                     setAuthMode('register')
                     setAuthError('')
                     setAuthSuccess('')
+                    setForgotQuestionText('')
                   }}
                 >
                   {t.register}
@@ -685,7 +784,7 @@ function App() {
                   autoComplete={authMode === 'login' ? 'username' : 'email'}
                 />
               </label>
-
+              
               {authMode === 'register' ? (
                 <label className="field">
                   <span>{t.name}</span>
@@ -723,27 +822,81 @@ function App() {
                 </label>
               ) : null}
 
-              {authMode === 'forgot' ? (
-                <label className="field">
-                  <span>{lang === 'en' ? 'New password' : 'סיסמה חדשה'}</span>
-                  <div style={{ position: 'relative' }}>
+              {authMode === 'register' ? (
+                <>
+                  <label className="field">
+                    <span>{lang === 'he' ? 'שאלת אבטחה' : 'Security question'}</span>
+                    <select
+                      className="authInput"
+                      value={securityQuestionKey}
+                      onChange={(e) => setSecurityQuestionKey(e.target.value)}
+                    >
+                      <option value="motherMaiden">{lang === 'he' ? 'מה שם המשפחה של אמך לפני נישואין?' : "What is your mother's maiden name?"}</option>
+                      <option value="motherBirthCity">{lang === 'he' ? 'באיזו עיר אמא שלך נולדה?' : 'In which city was your mother born?'}</option>
+                      <option value="favoriteMovie">{lang === 'he' ? 'מה הסרט האהוב עליך?' : 'What is your favorite movie?'}</option>
+                      <option value="firstTeacher">{lang === 'he' ? 'מה השם הפרטי של המורה הראשון/ה שלך?' : 'What was the first name of your first teacher?'}</option>
+                      <option value="childhoodFriend">{lang === 'he' ? 'מה השם הפרטי של חבר/ת הילדות הכי טוב/ה שלך?' : 'What is the first name of your childhood best friend?'}</option>
+                      <option value="firstPhone">{lang === 'he' ? 'מה היו 4 הספרות האחרונות של מספר הטלפון הראשון שלך?' : 'What was the last 4 digits of your first phone number?'}</option>
+                      <option value="favoriteBook">{lang === 'he' ? 'מה הספר האהוב עליך?' : 'What is your favorite book?'}</option>
+                      <option value="firstJobCity">{lang === 'he' ? 'באיזו עיר הייתה העבודה הראשונה שלך?' : 'In which city did you have your first job?'}</option>
+                    </select>
+                  </label>
+                  <label className="field">
+                    <span>{lang === 'he' ? 'תשובת אבטחה' : 'Security answer'}</span>
                     <input
                       className="authInput"
-                      value={resetPassword}
-                      placeholder="••••"
-                      onChange={(e) => setResetPassword(e.target.value)}
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password"
+                      value={securityAnswer}
+                      placeholder={lang === 'he' ? 'הזן תשובת אבטחה' : 'Enter security answer'}
+                      onChange={(e) => setSecurityAnswer(e.target.value)}
+                      type="text"
+                      autoComplete="off"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{ position: 'absolute', left: '10px', top: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
-                    >
-                      {showPassword ? "👁️" : "🙈"}
-                    </button>
-                  </div>
-                </label>
+                  </label>
+                </>
+              ) : null}
+
+              {authMode === 'forgot' ? (
+                <>
+                  {forgotQuestionText ? (
+                    <label className="field">
+                      <span>{lang === 'he' ? 'השאלה שלך' : 'Your security question'}</span>
+                      <input className="authInput" value={forgotQuestionText} readOnly />
+                    </label>
+                  ) : null}
+
+                  <label className="field">
+                    <span>{lang === 'he' ? 'תשובת אבטחה' : 'Security answer'}</span>
+                    <input
+                      className="authInput"
+                      value={securityAnswer}
+                      placeholder={lang === 'he' ? 'הזן תשובה' : 'Enter answer'}
+                      onChange={(e) => setSecurityAnswer(e.target.value)}
+                      type="text"
+                      autoComplete="off"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>{lang === 'en' ? 'New password' : 'סיסמה חדשה'}</span>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        className="authInput"
+                        value={resetPassword}
+                        placeholder="••••"
+                        onChange={(e) => setResetPassword(e.target.value)}
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ position: 'absolute', left: '10px', top: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                      >
+                        {showPassword ? "👁️" : "🙈"}
+                      </button>
+                    </div>
+                  </label>
+                </>
               ) : null}
 
               {authError ? <div className="authError">{authError}</div> : null}
@@ -770,6 +923,8 @@ function App() {
                     setAuthMode('forgot')
                     setAuthError('')
                     setAuthSuccess('')
+                    setForgotQuestionText('')
+                    setSecurityAnswer('')
                   }}
                 >
                   {lang === 'en' ? 'Forgot password?' : 'שכחתי סיסמה'}
@@ -778,7 +933,6 @@ function App() {
             </form>
 
             <div className="panelFooter">
-              <div className="hint">Demo auth using localStorage.</div>
             </div>
           </section>
         </main>

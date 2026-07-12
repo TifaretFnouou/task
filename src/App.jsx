@@ -831,12 +831,12 @@ function App() {
                       value={securityQuestionKey}
                       onChange={(e) => setSecurityQuestionKey(e.target.value)}
                     >
-                      <option value="motherMaiden">{lang === 'he' ? 'מה שם המשפחה של אמך לפני נישואין?' : "What is your mother's maiden name?"}</option>
+                      <option value="motherMaiden">{lang === 'he' ? 'מה שם המשפחה של אמך לפני נישואים?' : "What is your mother's maiden name?"}</option>
                       <option value="motherBirthCity">{lang === 'he' ? 'באיזו עיר אמא שלך נולדה?' : 'In which city was your mother born?'}</option>
                       <option value="favoriteMovie">{lang === 'he' ? 'מה הסרט האהוב עליך?' : 'What is your favorite movie?'}</option>
                       <option value="firstTeacher">{lang === 'he' ? 'מה השם הפרטי של המורה הראשון/ה שלך?' : 'What was the first name of your first teacher?'}</option>
                       <option value="childhoodFriend">{lang === 'he' ? 'מה השם הפרטי של חבר/ת הילדות הכי טוב/ה שלך?' : 'What is the first name of your childhood best friend?'}</option>
-                      <option value="firstPhone">{lang === 'he' ? 'מה היו 4 הספרות האחרונות של מספר הטלפון הראשון שלך?' : 'What was the last 4 digits of your first phone number?'}</option>
+                      <option value="firstPhone">{lang === 'he' ? 'באיזה עיר אבא שלך נולד' : 'What was the last 4 digits of your first phone number?'}</option>
                       <option value="favoriteBook">{lang === 'he' ? 'מה הספר האהוב עליך?' : 'What is your favorite book?'}</option>
                       <option value="firstJobCity">{lang === 'he' ? 'באיזו עיר הייתה העבודה הראשונה שלך?' : 'In which city did you have your first job?'}</option>
                     </select>

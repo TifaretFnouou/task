@@ -34,7 +34,7 @@ const SECURITY_QUESTIONS = {
   favoriteMovie: 'What is your favorite movie?',
   firstTeacher: 'What was the first name of your first teacher?',
   childhoodFriend: 'What is the first name of your childhood best friend?',
-  firstPhone: 'What was the last 4 digits of your first phone number?',
+  firstPhone: 'In which city was your father born?',
   favoriteBook: 'What is your favorite book?',
   firstJobCity: 'In which city did you have your first job?',
 };
